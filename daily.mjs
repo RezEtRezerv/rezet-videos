@@ -19,8 +19,8 @@ const HISTORY = 'history.json';
 const history = fs.existsSync(HISTORY) ? JSON.parse(fs.readFileSync(HISTORY, 'utf8')) : [];
 const SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '15:30', '16:00'];
 const ICONS = ['cal', 'mail', 'star', 'clock', 'chart', 'users'];
-// Xərci aşağı saxlamaq üçün: mətni Sonnet yazır, yoxlamanı ən ucuz model (Haiku) edir. Ayda təxminən 1 dollardan az.
-const MODEL_WRITE = 'claude-sonnet-5-5', MODEL_CHECK = 'claude-haiku-5-5';
+// Mətni ən güclü model (Opus) yazır, kadrları ucuz model (Haiku) yoxlayır. Xərc: ayda təxminən 1.3 dollar (5 dollar ~3-4 aya çatır).
+const MODEL_WRITE = 'claude-opus-5-5', MODEL_CHECK = 'claude-haiku-5-5';
 const isWin = process.platform === 'win32';
 const npx = (args, opts = {}) => execFileSync(isWin ? 'npx.cmd' : 'npx', args, { stdio: 'inherit', shell: isWin, ...opts });
 
