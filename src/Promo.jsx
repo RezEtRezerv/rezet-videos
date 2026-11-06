@@ -14,6 +14,8 @@ export const sceneFrames = s => s.frames || Math.ceil((s.seconds + 0.7) * FPS) +
 export const totalFrames = scenes => scenes.reduce((n, s) => n + sceneFrames(s), 0) - T * (scenes.length - 1);
 
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' };
+// Uzun mətn avtomatik kiçilir ki, heç vaxt kənara çıxmasın
+export const fit = (text, base, ideal) => { const n = String(text || '').length; return n <= ideal ? base : Math.round(Math.max(base * 0.66, base * Math.sqrt(ideal / n))); };
 const useSpring = (delay = 0, config = { damping: 14, mass: 0.7 }) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   return spring({ frame: f - delay, fps, config });
@@ -39,7 +41,7 @@ const Bg = () => {
 const Title = ({ text, top = 200, size = 82, delay = 4 }) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   return (
-    <div style={{ position: 'absolute', top, left: 70, right: 70, textAlign: 'center', fontSize: size, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.02em', color: '#fff' }}>
+    <div style={{ position: 'absolute', top, left: 70, right: 70, textAlign: 'center', fontSize: fit(text, size, 34), fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.02em', color: '#fff' }}>
       {text.split(' ').map((w, i) => {
         const p = spring({ frame: f - delay - i * 5, fps, config: { damping: 15, mass: 0.8 } });
         return <span key={i} style={{ display: 'inline-block', marginRight: '0.25em', opacity: p, transform: `translateY(${(1 - p) * 50}px)`, color: w === '—' ? C.mint : undefined }}>{w}</span>;
@@ -78,7 +80,7 @@ const Line = ({ text, delay = 34 }) => {
   const p = useSpring(delay, { damping: 18 });
   return (
     <div style={{ position: 'absolute', left: 60, right: 60, bottom: 330, display: 'flex', justifyContent: 'center' }}>
-      <div style={{ background: 'rgba(3,20,15,.62)', borderRadius: 26, padding: '20px 34px', fontSize: 48, fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.25, opacity: p, transform: `translateY(${(1 - p) * 30}px)` }}>{text}</div>
+      <div style={{ background: 'rgba(3,20,15,.62)', borderRadius: 26, padding: '20px 34px', fontSize: fit(text, 48, 50), fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.25, opacity: p, transform: `translateY(${(1 - p) * 30}px)` }}>{text}</div>
     </div>
   );
 };
@@ -154,7 +156,7 @@ const Phone = ({ s, l }) => {
           <div style={{ position: 'absolute', top: 18, left: '50%', width: 150, height: 40, marginLeft: -75, borderRadius: 20, background: '#0B1512', zIndex: 5 }} />
           <div style={{ background: C.g, color: '#fff', padding: '86px 34px 30px' }}>
             <div style={{ fontSize: 24, opacity: 0.75, fontWeight: 700 }}>RezEt</div>
-            <div style={{ fontSize: 38, fontWeight: 900, marginTop: 6 }}>{s.biz}</div>
+            <div style={{ fontSize: fit(s.biz, 38, 20), fontWeight: 900, marginTop: 6 }}>{s.biz}</div>
             <div style={{ fontSize: 24, marginTop: 8, color: C.gold }}>★★★★★ <span style={{ color: '#fff', opacity: 0.8 }}>4.9</span></div>
           </div>
           {/* xidmətlər */}
@@ -205,10 +207,121 @@ const Cards = ({ s }) => {
         return (
           <div key={i} style={{ position: 'absolute', left: 90, right: 90, top: 560 + i * 230, height: 190, borderRadius: 40, background: 'rgba(255,255,255,.96)', display: 'flex', alignItems: 'center', gap: 34, padding: '0 40px', opacity: p, transform: `translateX(${(1 - p) * (i % 2 ? -400 : 400)}px)`, boxShadow: '0 24px 50px rgba(0,0,0,.25)' }}>
             <div style={{ width: 110, height: 110, borderRadius: 30, background: gold(i) ? '#FFF4DC' : '#E3F4EE', padding: 26, flexShrink: 0 }}>{icons[i](gold(i) ? C.gold : C.g)}</div>
-            <div style={{ fontSize: 46, fontWeight: 900, color: C.ink, lineHeight: 1.1 }}>{x}</div>
+            <div style={{ fontSize: fit(x, 46, 26), fontWeight: 900, color: C.ink, lineHeight: 1.1 }}>{x}</div>
           </div>
         );
       })}
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- sual: böyük sual, nəbz kimi döyünən işarə ---------- */
+const Question = ({ s }) => {
+  const f = useCurrentFrame();
+  const q = useSpring(16, { damping: 10 }), ring = (f % 45) / 45;
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={260} size={92} />
+      <div style={{ position: 'absolute', top: 760, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ position: 'relative', width: 300, height: 300 }}>
+          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: `6px solid ${C.mint}`, opacity: (1 - ring) * q, transform: `scale(${1 + ring * 0.5})` }} />
+          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: C.mint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 210, fontWeight: 900, color: C.deep, transform: `scale(${q}) rotate(${(1 - q) * -40}deg)` }}>?</div>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- əvvəl / sonra: iki kart, ikincisi sonra gəlir ---------- */
+const BeforeAfter = ({ s, l }) => {
+  const { durationInFrames } = useVideoConfig();
+  const a = useSpring(14), b = useSpring(Math.round(durationInFrames * 0.42));
+  const box = (label, list, good, p) => (
+    <div style={{ background: good ? 'rgba(255,255,255,.97)' : 'rgba(255,255,255,.12)', border: good ? 'none' : '3px solid rgba(255,90,95,.6)', borderRadius: 36, padding: '28px 36px', opacity: p, transform: `translateY(${(1 - p) * 60}px)`, boxShadow: good ? '0 24px 50px rgba(0,0,0,.25)' : 'none' }}>
+      <div style={{ fontSize: 34, fontWeight: 900, color: good ? C.g : '#FF8A8E', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</div>
+      {list.map((x, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 18, fontSize: fit(x, 40, 26), fontWeight: 800, color: good ? C.ink : '#fff', margin: '12px 0', lineHeight: 1.15 }}>
+          <span style={{ width: 46, height: 46, borderRadius: 23, flexShrink: 0, background: good ? C.g : C.red, color: '#fff', fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{good ? '✓' : '✕'}</span>{x}
+        </div>
+      ))}
+    </div>
+  );
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={170} size={80} />
+      <div style={{ position: 'absolute', top: 500, left: 80, right: 80, display: 'flex', flexDirection: 'column', gap: 34 }}>
+        {box(l.before, s.items.slice(0, 3), false, a)}
+        {box(l.after, s.items.slice(3, 6), true, b)}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- biznes paneli: bu günün rezervləri, biri "Gəldi" olur ---------- */
+const Panel = ({ s, l }) => {
+  const f = useCurrentFrame(), { durationInFrames } = useVideoConfig();
+  const enter = interpolate(f, [12, 34], [0, 1], { ...clamp, easing: Easing.bezier(0.22, 1, 0.36, 1) });
+  const flip = Math.round(durationInFrames * 0.55);
+  const rows = s.items.slice(0, 3).map(x => { const [name, svc, time] = String(x).split('·').map(v => v.trim()); return { name: name || '', svc: svc || '', time: time || '' }; });
+  const ps = [useSpring(30), useSpring(44), useSpring(58)];
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={190} size={80} />
+      <div style={{ position: 'absolute', top: 540, left: 70, right: 70, background: C.paper, borderRadius: 40, overflow: 'hidden', opacity: enter, transform: `translateY(${(1 - enter) * 120}px)`, boxShadow: '0 40px 90px rgba(0,0,0,.45)' }}>
+        <div style={{ background: C.g, color: '#fff', padding: '30px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div><div style={{ fontSize: 24, fontWeight: 700, opacity: 0.75 }}>RezEt · Panel</div><div style={{ fontSize: fit(s.biz, 38, 20), fontWeight: 900, marginTop: 4 }}>{s.biz}</div></div>
+          <div style={{ background: 'rgba(255,255,255,.16)', borderRadius: 999, padding: '10px 22px', fontSize: 26, fontWeight: 800 }}>{l.today}</div>
+        </div>
+        <div style={{ padding: '18px 26px 26px' }}>
+          {rows.map((r, i) => {
+            const p = ps[i], came = i === 0 && f > flip;
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 22, background: '#fff', borderRadius: 24, padding: '22px 24px', marginTop: 14, border: '3px solid #E2EBE7', opacity: p, transform: `translateX(${(1 - p) * 120}px)` }}>
+                <div style={{ fontSize: 32, fontWeight: 900, color: C.g, width: 96 }}>{r.time}</div>
+                <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: fit(r.name, 32, 16), fontWeight: 900, color: C.ink }}>{r.name}</div><div style={{ fontSize: fit(r.svc, 26, 20), color: '#6B7C76', fontWeight: 600 }}>{r.svc}</div></div>
+                <div style={{ borderRadius: 999, padding: '10px 18px', fontSize: 24, fontWeight: 800, background: came ? C.g : '#E3F4EE', color: came ? '#fff' : C.g, transform: came ? `scale(${1 + 0.12 * Math.max(0, 1 - (f - flip) / 8)})` : undefined }}>{came ? l.came : l.confirmed}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- 3 məsləhət: nömrəli kartlar ---------- */
+const Tips = ({ s }) => {
+  const ps = [useSpring(22), useSpring(52), useSpring(82)];
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={200} size={84} />
+      {s.items.slice(0, 3).map((x, i) => (
+        <div key={i} style={{ position: 'absolute', left: 80, right: 80, top: 520 + i * 250, minHeight: 200, borderRadius: 40, background: 'rgba(255,255,255,.96)', display: 'flex', alignItems: 'center', gap: 32, padding: '24px 40px', opacity: ps[i], transform: `translateY(${(1 - ps[i]) * 80}px)`, boxShadow: '0 24px 50px rgba(0,0,0,.25)' }}>
+          <div style={{ width: 96, height: 96, borderRadius: 48, background: C.g, color: '#fff', fontSize: 52, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
+          <div style={{ fontSize: fit(x, 42, 30), fontWeight: 800, color: C.ink, lineHeight: 1.18 }}>{x}</div>
+        </div>
+      ))}
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- müştəri rəyi: ulduzlar bir-bir dolur ---------- */
+const Review = ({ s, l }) => {
+  const f = useCurrentFrame();
+  const card = useSpring(12, { damping: 16 });
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={220} size={84} />
+      <div style={{ position: 'absolute', top: 620, left: 80, right: 80, background: 'rgba(255,255,255,.97)', borderRadius: 44, padding: '46px 48px', opacity: card, transform: `scale(${0.9 + card * 0.1})`, boxShadow: '0 30px 70px rgba(0,0,0,.35)' }}>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {[0, 1, 2, 3, 4].map(i => { const on = interpolate(f, [28 + i * 6, 34 + i * 6], [0, 1], clamp); return <div key={i} style={{ width: 70, height: 70, transform: `scale(${0.6 + on * 0.4})` }}>{Ic.star(on > 0.5 ? C.gold : '#D5DDDA')}</div>; })}
+        </div>
+        <div style={{ fontSize: fit(s.items[1], 46, 70), fontWeight: 800, color: C.ink, lineHeight: 1.3, marginTop: 30, opacity: interpolate(f, [40, 56], [0, 1], clamp) }}>“{s.items[1]}”</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 30, opacity: interpolate(f, [52, 66], [0, 1], clamp) }}>
+          <div style={{ width: 64, height: 64, borderRadius: 32, background: C.g, color: '#fff', fontSize: 30, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{String(s.items[0] || '?')[0]}</div>
+          <div><div style={{ fontSize: 32, fontWeight: 900, color: C.ink }}>{s.items[0]}</div><div style={{ fontSize: 24, fontWeight: 700, color: C.g }}>✓ {l.verified}</div></div>
+        </div>
+      </div>
     </AbsoluteFill>
   );
 };
@@ -232,10 +345,10 @@ const Cta = ({ s, url }) => {
 };
 
 export const L = {
-  az: { missed: 'Buraxılmış zəng', choose: 'Xidmət seçin', chooseTime: 'Vaxt seçin · Sabah', confirm: 'Təsdiqlə', tomorrow: 'Sabah', emailSent: 'Təsdiq e-poçta göndərildi', cur: 'AZN' },
-  en: { missed: 'Missed call', choose: 'Choose a service', chooseTime: 'Pick a time · Tomorrow', confirm: 'Confirm', tomorrow: 'Tomorrow', emailSent: 'Confirmation sent by email', cur: 'AZN' }
+  az: { missed: 'Buraxılmış zəng', choose: 'Xidmət seçin', chooseTime: 'Vaxt seçin · Sabah', confirm: 'Təsdiqlə', tomorrow: 'Sabah', emailSent: 'Təsdiq e-poçta göndərildi', cur: 'AZN', before: 'Əvvəl', after: 'RezEt ilə', today: 'Bu gün', confirmed: 'Təsdiq', came: 'Gəldi', verified: 'Təsdiqlənmiş müştəri' },
+  en: { missed: 'Missed call', choose: 'Choose a service', chooseTime: 'Pick a time · Tomorrow', confirm: 'Confirm', tomorrow: 'Tomorrow', emailSent: 'Confirmation sent by email', cur: 'AZN', before: 'Before', after: 'With RezEt', today: 'Today', confirmed: 'Confirmed', came: 'Arrived', verified: 'Verified customer' }
 };
-const SCENES = { calls: Calls, phone: Phone, cards: Cards, cta: Cta };
+const SCENES = { calls: Calls, question: Question, phone: Phone, cards: Cards, beforeAfter: BeforeAfter, panel: Panel, tips: Tips, review: Review, cta: Cta };
 
 export const Promo = ({ scenes, url, music, lang }) => (
   <AbsoluteFill style={{ fontFamily, background: C.deep }}>
@@ -249,7 +362,7 @@ export const Promo = ({ scenes, url, music, lang }) => (
             <Sequence from={i ? T : 0} durationInFrames={sceneFrames(s) - (i ? T : 0)} layout="none">
               <S s={s} url={url} l={L[lang] || L.az} />
               <Subs words={s.words} />
-              {s.line && !s.words?.length && <Line text={s.line} />}
+              {s.line && !s.words?.length && <Line text={s.line} delay={s.type === 'tips' || s.type === 'beforeAfter' ? 70 : 34} />}
             </Sequence>
             {s.audio && <Audio src={staticFile(s.audio)} />}
           </TransitionSeries.Sequence>
