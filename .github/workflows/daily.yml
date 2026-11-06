@@ -1,0 +1,63 @@
+# Hər gün 06:00 (Bakı vaxtı) Claude ssenari yazır, iki video hazırlanır (az + en)
+# və GitHub Pages-də ictimai linkə qoyulur. Make.com 08:00-da latest.json-u oxuyub paylaşır.
+name: Daily video
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 02:00 UTC = 06:00 Bakı
+  workflow_dispatch: # Actions səhifəsindən əl ilə işə salmaq üçün
+
+permissions:
+  contents: write # history.json-u yadda saxlamaq üçün
+  pages: write
+  id-token: write
+
+concurrency:
+  group: daily-video
+  cancel-in-progress: false
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Prepare video browser
+        run: npx remotion browser ensure
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Write script and render videos
+        run: node daily.mjs
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PAGES_URL: ${{ steps.pages.outputs.base_url }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      # Mövzu tarixçəsi yadda qalır (təkrar olmasın). Həm də repo "aktiv" qalır:
+      # GitHub 60 gün dəyişiklik olmayan repolarda planlı işləri dayandırır.
+      - name: Save topic history
+        run: |
+          git config user.name "rezet-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history.json
+          git commit -m "Video $(date -u +%F)" || echo "No change"
+          git push

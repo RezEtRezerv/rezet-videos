@@ -1,0 +1,12 @@
+{
+  "id": "sample-az-3",
+  "lang": "az",
+  "bpm": 100,
+  "url": "rezerv.rezervaz.workers.dev",
+  "scenes": [
+    { "type": "calls", "bars": 3, "title": "Hər buraxılmış zəng — itirilmiş müştəri", "badge": "3 buraxılmış zəng", "line": "Siz müştəri ilə məşğulsunuz, telefon isə susmur." },
+    { "type": "phone", "bars": 4, "title": "Müştəriləriniz özləri rezerv etsin", "biz": "Nərvix Barber Studio", "service": "Saç və saqqal", "time": "10:30", "ok": "Rezerv təsdiqləndi", "line": "Zəng etmədən. Günün istənilən saatında." },
+    { "type": "cards", "bars": 3, "title": "Hər şey avtomatik", "items": ["7/24 onlayn rezerv", "E-poçtla təsdiq və xatırlatma", "Rəylər və ulduzlar"], "line": "Bütün rezervlər bir paneldə." },
+    { "type": "cta", "bars": 3, "title": "RezEt", "sub": "Bizneslər üçün onlayn rezerv", "button": "Pulsuz başlayın" }
+  ]
+}

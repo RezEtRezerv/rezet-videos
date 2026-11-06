@@ -1,0 +1,9 @@
+node_modules/
+out/
+site/
+public/voice/
+public/music/
+props.json
+props-*.json
+rezet-logo.jpg
+.env
