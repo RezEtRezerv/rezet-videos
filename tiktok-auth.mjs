@@ -4,6 +4,8 @@
 // Sandbox üçün sandbox açarlarını, əsas (production) üçün production açarlarını istifadə edin.
 import readline from 'node:readline/promises';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import { spawn } from 'node:child_process';
 
 const KEY = process.env.TIKTOK_CLIENT_KEY, SECRET = process.env.TIKTOK_CLIENT_SECRET;
 const REDIRECT = process.env.TIKTOK_REDIRECT || 'https://rezerv.rezervaz.workers.dev/tiktok-callback.html';
@@ -26,6 +28,9 @@ const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
 });
 const j = await res.json();
 if (!j.refresh_token) { console.error('\nAlınmadı:', j.error || '', j.error_description || JSON.stringify(j)); process.exit(1); }
-console.log('\nHazırdır ✅  Bu dəyəri GitHub-da TIKTOK_REFRESH_TOKEN adlı Secret kimi saxlayın (heç kimə göndərməyin):\n');
-console.log(j.refresh_token);
+// Token ekranda göstərilmir (uzun sətir kopyalanarkən qırıla bilər): fayla yazılır və Notepad-də açılır
+fs.writeFileSync('tiktok-token.txt', j.refresh_token);
+console.log('\nHazırdır ✅  Token tiktok-token.txt faylına yazıldı və Notepad-də açılır.');
+console.log('Notepad-də Ctrl+A, sonra Ctrl+C edin və GitHub-da TIKTOK_REFRESH_TOKEN-ə yapışdırın. Sonra faylı silin.');
+if (process.platform === 'win32') spawn('notepad', ['tiktok-token.txt'], { detached: true, stdio: 'ignore' }).unref();
 console.log(`\nİcazələr: ${j.scope}. Token ${Math.round((j.refresh_expires_in || 0) / 86400)} gün etibarlıdır, sonra bu skripti yenidən işlədin.\n`);
