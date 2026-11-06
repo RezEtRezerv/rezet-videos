@@ -243,7 +243,15 @@ for (let attempt = 1; ; attempt++) {
 fs.writeFileSync(path.join(QA_DIR, 'report.json'), JSON.stringify(log, null, 2));
 const entry = lang => ({ video: `${BASE}/${today}-${lang}.mp4`, title: sc[lang].title, caption: sc[lang].caption });
 fs.writeFileSync(path.join(SITE, 'latest.json'), JSON.stringify({ date: today, topic: sc.topic, format: FORMAT, az: entry('az'), en: entry('en') }, null, 2));
-fs.writeFileSync(path.join(SITE, 'index.html'), `<!doctype html><meta charset="utf-8"><title>RezEt videos</title><h1>${today}</h1><video src="${today}-az.mp4" controls width="360"></video><video src="${today}-en.mp4" controls width="360"></video>`);
+// Telefon üçün səhifə: günün videoları, başlıq və mətn, bir toxunuşla kopyalama (TikTok qaralaması üçün)
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const block = (lang, label) => `<section><h2>${label}</h2><video src="${today}-${lang}.mp4" controls playsinline></video>
+<p class="t">${esc(sc[lang].title)}</p><p class="c" id="c-${lang}">${esc(sc[lang].caption)}</p>
+<button data-copy="c-${lang}">Mətni kopyala</button> <a href="${today}-${lang}.mp4" download>Videonu yüklə</a></section>`;
+fs.writeFileSync(path.join(SITE, 'index.html'), `<!doctype html><html lang="az"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>RezEt videoları · ${today}</title>
+<style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#F4F8F6;color:#10231D}h1{font-size:1.3rem;color:#0D5E4A}section{background:#fff;border-radius:16px;padding:16px;margin:0 0 16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}video{width:100%;max-width:360px;border-radius:12px;display:block}.t{font-weight:700;margin:12px 0 4px}.c{white-space:pre-wrap;margin:0 0 12px}button,a{display:inline-block;background:#0D5E4A;color:#fff;border:0;border-radius:10px;padding:12px 16px;font-size:1rem;text-decoration:none;margin:4px 6px 0 0}a{background:#3DDC97;color:#062A21}</style>
+<h1>RezEt · ${today}</h1>${block('az', 'Azərbaycanca (TikTok, Instagram, YouTube)')}${block('en', 'English (LinkedIn)')}
+<script>document.addEventListener('click',async e=>{const b=e.target.closest('[data-copy]');if(!b)return;const t=document.getElementById(b.dataset.copy).textContent;try{await navigator.clipboard.writeText(t);b.textContent='Kopyalandı ✓'}catch{b.textContent='Mətni əl ilə seçin'}});</script></html>`);
 history.push({ date: today, format: FORMAT, sector: sc.sector, topic: sc.topic, biz: sc.biz });
 fs.writeFileSync(HISTORY, JSON.stringify(history.slice(-90), null, 2));
 console.log('Hazırdır:', `${BASE}/latest.json`);
