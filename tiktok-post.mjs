@@ -34,10 +34,19 @@ const privacy = info.privacy_level_options?.includes(PRIVACY) ? PRIVACY : 'SELF_
 // 3. Video faylı endirilir və TikTok-a yüklənir
 const video = Buffer.from(await (await fetch(latest.az.video, { cache: 'no-store' })).arrayBuffer());
 const caption = String(latest.az.caption || latest.az.title || '').slice(0, 2200);
-const init = await call('/post/publish/video/init/', {
-  post_info: { title: caption, privacy_level: privacy, disable_comment: false, disable_duet: false, disable_stitch: false, video_cover_timestamp_ms: 1500 },
-  source_info: { source: 'FILE_UPLOAD', video_size: video.length, chunk_size: video.length, total_chunk_count: 1 }
-});
+const source_info = { source: 'FILE_UPLOAD', video_size: video.length, chunk_size: video.length, total_chunk_count: 1 };
+// Tətbiq TikTok yoxlamasından keçməyibsə, birbaşa paylaşma yalnız gizli hesablara icazəlidir.
+// Belə halda video qaralama kimi TikTok-un gələnlər qutusuna göndərilir: telefonda bir toxunuşla paylaşırsınız.
+let init, inbox = process.env.TIKTOK_MODE === 'inbox';
+if (!inbox) {
+  try {
+    init = await call('/post/publish/video/init/', { post_info: { title: caption, privacy_level: privacy, disable_comment: false, disable_duet: false, disable_stitch: false, video_cover_timestamp_ms: 1500 }, source_info });
+  } catch (e) {
+    console.log('Birbaşa paylaşma alınmadı (' + e.message + '). Qaralama kimi göndərilir.');
+    inbox = true;
+  }
+}
+if (inbox) init = await call('/post/publish/inbox/video/init/', { source_info });
 const up = await fetch(init.upload_url, {
   method: 'PUT',
   headers: { 'Content-Type': 'video/mp4', 'Content-Length': String(video.length), 'Content-Range': `bytes 0-${video.length - 1}/${video.length}` },
@@ -51,6 +60,7 @@ for (let i = 0; i < 20; i++) {
   const st = await call('/post/publish/status/fetch/', { publish_id: init.publish_id });
   console.log('Status:', st.status);
   if (st.status === 'PUBLISH_COMPLETE') { console.log(`TikTok-a göndərildi ✅ (gizlilik: ${privacy})`); process.exit(0); }
+  if (st.status === 'SEND_TO_USER_INBOX') { console.log('Qaralama TikTok-a göndərildi ✅ Telefonda TikTok bildirişini açıb paylaşın. Mətn: ' + caption.slice(0, 80)); process.exit(0); }
   if (st.status === 'FAILED') throw new Error('TikTok videonu qəbul etmədi: ' + (st.fail_reason || ''));
 }
 console.log('TikTok hələ emal edir. Bir neçə dəqiqəyə profildə görünməlidir.');
