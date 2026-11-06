@@ -1,0 +1,25 @@
+# Hər gün 08:00 (Bakı vaxtı) günün Azərbaycan dilindəki videosunu TikTok-a göndərir.
+# TikTok açarları əlavə edilməyibsə, heç nə etmir.
+name: TikTok post
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # 04:00 UTC = 08:00 Bakı
+  workflow_dispatch:
+
+jobs:
+  tiktok:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Post today's video to TikTok
+        run: node tiktok-post.mjs
+        env:
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+          TIKTOK_PRIVACY: ${{ vars.TIKTOK_PRIVACY }}
