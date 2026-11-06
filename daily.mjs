@@ -19,7 +19,7 @@ const HISTORY = 'history.json';
 const history = fs.existsSync(HISTORY) ? JSON.parse(fs.readFileSync(HISTORY, 'utf8')) : [];
 const SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '15:30', '16:00'];
 const ICONS = ['cal', 'mail', 'star', 'clock', 'chart', 'users'];
-// Mətni ən güclü model (Opus) yazır, kadrları ucuz model (Haiku) yoxlayır. Xərc: ayda təxminən 1.3 dollar (5 dollar ~3-4 aya çatır).
+// Mətni ən güclü model (Opus) yazır, kadrları ucuz model (Haiku) yoxlayır. Xərc: ayda təxminən 1-2.2 dollar (5 dollar ~2-3 aya çatır).
 const MODEL_WRITE = 'claude-opus-5-5', MODEL_CHECK = 'claude-haiku-5-5';
 const isWin = process.platform === 'win32';
 const npx = (args, opts = {}) => execFileSync(isWin ? 'npx.cmd' : 'npx', args, { stdio: 'inherit', shell: isWin, ...opts });
@@ -93,7 +93,7 @@ async function writeScript(client, feedback) {
     max_tokens: 16000,
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
-    output_config: { effort: 'low', format: betaZodOutputFormat(Script) },
+    output_config: { effort: 'medium', format: betaZodOutputFormat(Script) },
     system: SYSTEM,
     messages: [{ role: 'user', content: `Date: ${today}.\nToday's scene types, in this order: ${need}.\nRecent videos (avoid repeating them):\n${recent}${fix}\n\nWrite today's video.` }]
   });
