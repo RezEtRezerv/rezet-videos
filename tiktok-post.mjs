@@ -10,8 +10,6 @@ const today = new Date(Date.now() + 4 * 3600e3).toISOString().slice(0, 10);
 
 if (!KEY || !SECRET || !REFRESH) { console.log('TikTok açarları əlavə edilməyib, TikTok buraxılır.'); process.exit(0); }
 
-const latest = await (await fetch(LATEST, { cache: 'no-store' })).json();
-if (latest.date !== today) { console.log(`Bu günün videosu yoxdur (son video: ${latest.date}). Heç nə göndərilmir.`); process.exit(0); }
 
 // 1. Giriş: refresh token ilə qısa müddətli access token alınır
 const tok = await (await fetch(`${API}/oauth/token/`, {
@@ -20,6 +18,10 @@ const tok = await (await fetch(`${API}/oauth/token/`, {
 })).json();
 if (!tok.access_token) throw new Error('TikTok girişi alınmadı: ' + (tok.error_description || tok.error || JSON.stringify(tok)));
 if (tok.refresh_token && tok.refresh_token !== REFRESH) console.log('Qeyd: TikTok yeni refresh token verdi. Köhnəsi işləməyi dayandırsa, tiktok-auth.mjs-i yenidən işlədin.');
+console.log('TikTok girişi işləyir ✅');
+// Giriş əvvəl yoxlanılır ki, açar problemi videonun olub-olmamasından asılı olmadan görünsün
+const latest = await (await fetch(LATEST, { cache: 'no-store' })).json();
+if (latest.date !== today) { console.log(`Bu günün videosu yoxdur (son video: ${latest.date}). Heç nə göndərilmir.`); process.exit(0); }
 const H = { Authorization: `Bearer ${tok.access_token}`, 'Content-Type': 'application/json; charset=UTF-8' };
 const call = async (path, body) => {
   const r = await (await fetch(`${API}${path}`, { method: 'POST', headers: H, body: JSON.stringify(body || {}) })).json();
