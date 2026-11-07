@@ -104,7 +104,29 @@ async function writeScript(client, feedback) {
 
 /* ---------- 2. Mətn yoxlaması: limitlər, say, qadağalar ---------- */
 const cut = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length <= n ? s : s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…'; };
-const NO_LINKS = /(https?:\/\/|www\.|\.(az|com|dev|net|org)\b|@\w)/i;
+// Şəxsi və əlaqə məlumatı avtomatik silinir: e-poçt, link, telefon nömrəsi, @istifadəçi adı.
+// Heşteqlər (#...), saatlar (10:30), qiymətlər və "7/24" qalır.
+const PRIVATE = [
+  [/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, 'email'],
+  [/\b(?:https?:\/\/|www\.)\S+/gi, 'link'],
+  [/\b(?:[\w-]+\.)+(?:az|com|net|org|dev|io|info|ru|tr|me|app|co)\b(?:\/\S*)?/gi, 'link'],
+  [/(?:\+|\b00)\d[\d\s().-]{6,}\d/g, 'phone'],
+  [/\b\d{2,4}[\s.-]\d{2,4}[\s.-]\d{2,4}(?:[\s.-]\d{2,4})?\b/g, 'phone'],
+  [/\b\d{7,}\b/g, 'phone'],
+  [/(^|[\s(])@[\w.]{2,}/g, 'handle']
+];
+const removed = [];
+function scrub(v, where = '') {
+  if (typeof v === 'string') {
+    let s = v;
+    for (const [re, kind] of PRIVATE) s = s.replace(re, (m, pre) => { removed.push(`${where}: ${kind}`); return typeof pre === 'string' && kind === 'handle' ? pre : ''; });
+    return s === v ? v : s.replace(/\s{2,}/g, ' ').replace(/\s+([.,!?;:])/g, '$1').trim();
+  }
+  if (Array.isArray(v)) return v.map((x, i) => scrub(x, `${where}[${i}]`));
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, scrub(x, where ? `${where}.${k}` : k)]));
+  return v;
+}
+const NO_LINKS = /(https?:\/\/|www\.|[\w.+-]+@[\w-]+\.\w|\+\d{6,})/i;
 const LIMITS = { calls: [42, 55, 1, 22], question: [48, 55, 0, 0], phone: [40, 50, 1, 24], cards: [26, 50, 3, 28], beforeAfter: [40, 50, 6, 28], panel: [40, 50, 3, 40], tips: [40, 50, 3, 44], review: [40, 50, 2, 90] };
 function check(sc) {
   const bad = [];
@@ -181,7 +203,7 @@ Fail the video if you see ANY of these:
 - empty boxes, missing text, placeholders (undefined, NaN, [object Object], "…" in the middle of an important phrase), broken or wrong characters (for example missing Azerbaijani letters);
 - spelling or grammar mistakes, unnatural phrasing, mixed languages in one version, or text that does not make sense;
 - a business or person name that looks like a real, well-known brand;
-- any URL, website, phone number, email or social handle;
+- any URL, website, phone number (even partly hidden), email, social handle, street address, ID or card number, or a person's full real-looking name (only first name + surname initial is allowed);
 - content that does not fit the business sector or is misleading.
 Ignore small style preferences. Only report real problems a viewer would notice. Each problem: one short sentence naming the frame and what to change.`;
 const QaResult = z.object({ pass: z.boolean(), problems: z.array(z.string()) });
@@ -215,7 +237,9 @@ let sc, feedback = null, log = [];
 for (let attempt = 1; ; attempt++) {
   fs.rmSync(SITE, { recursive: true, force: true }); fs.mkdirSync(SITE, { recursive: true });
   fs.rmSync(QA_DIR, { recursive: true, force: true }); fs.mkdirSync(QA_DIR, { recursive: true });
-  sc = await writeScript(client, feedback);
+  removed.length = 0;
+  sc = scrub(await writeScript(client, feedback));
+  if (removed.length) console.log('Avtomatik silindi (şəxsi məlumat):', removed.join(', '));
   const bad = check(sc);
   console.log(`Cəhd ${attempt} | format: ${FORMAT} | ${sc.topic} | ${sc.sector} | ${sc.biz}`);
   if (bad.length) {
