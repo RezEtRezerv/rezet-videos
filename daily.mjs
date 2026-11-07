@@ -112,7 +112,7 @@ async function writeScript(client, feedback) {
   const fix = feedback ? `\n\nA previous attempt today FAILED the automatic checks. Fix these problems:\n- ${feedback.join('\n- ')}` : '';
   const res = await client.beta.messages.parse({
     model: MODEL_WRITE,
-    max_tokens: 32000,
+    max_tokens: 20000,
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
     output_config: { effort: 'high', format: betaZodOutputFormat(Script) },
