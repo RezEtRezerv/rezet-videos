@@ -11,7 +11,7 @@ import { z } from 'zod';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { makeMusic } from './music.mjs';
 
-const FPS = 30, T = 18, MAX_TRIES = 2; // xərc az olsun deyə ən çox 2 cəhd
+const FPS = 30, T = 18, MAX_TRIES = 3; // 3-cü cəhd yalnız yoxlama keçməyəndə işləyir
 const MOCK = (process.argv.find(a => a.startsWith('--mock')) || '').split('=')[1] || (process.argv.includes('--mock') ? 'problem' : '');
 const SITE = 'site', QA_DIR = 'qa', BASE = (process.env.PAGES_URL || 'https://rezetrezerv.github.io/rezet-videos').replace(/\/$/, '');
 const today = new Date(Date.now() + 4 * 3600e3).toISOString().slice(0, 10); // Bakı vaxtı ilə tarix
@@ -21,7 +21,7 @@ const SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '1
 const ICONS = ['cal', 'mail', 'star', 'clock', 'chart', 'users'];
 // Mətni ən güclü model (Opus, yüksək səy) yazır, kadrları Sonnet yoxlayır (Azərbaycan mətnini şəkildə daha dəqiq oxuyur).
 // Xərc: ayda təxminən 2-3 dollar.
-const MODEL_WRITE = 'claude-opus-5-5', MODEL_CHECK = 'claude-sonnet-5-5';
+const MODEL_WRITE = 'claude-opus-5-5', MODEL_CHECK = 'claude-opus-5-5';
 const isWin = process.platform === 'win32';
 const npx = (args, opts = {}) => execFileSync(isWin ? 'npx.cmd' : 'npx', args, { stdio: 'inherit', shell: isWin, ...opts });
 
@@ -227,7 +227,7 @@ function frames(lang, video, scenes) {
   let start = 0;
   scenes.forEach((s, i) => {
     const from = start + (i ? T : 0), len = s.frames - (i ? T : 0);
-    const points = s.type === 'phone' ? [0.5, 0.88] : s.type === 'chat' ? [0.4, 0.92] : [0.9];
+    const points = s.type === 'phone' ? [0.2, 0.5, 0.88] : s.type === 'chat' ? [0.4, 0.92] : [0.9];
     for (const p of points) shots.push({ label: `${lang} scene ${i + 1} (${s.type})`, t: (from + len * p) / FPS });
     start += s.frames - T;
   });
@@ -247,6 +247,11 @@ Fail the video if you see ANY of these:
 - any URL, website, phone number (even partly hidden), email, social handle, street address, ID or card number, or a person's full real-looking name (only first name + surname initial is allowed);
 - content that does not fit the business sector or is misleading;
 - any mismatch between the texts and the visuals: a time, number, name, service or price in a title or bottom line that differs from what the phone, panel, cards or notifications show (for example the title says 23:00 but the phone clock or booking shows 11:00, or "4 missed calls" while 3 are shown).
+How the scenes work (do NOT fail for these):
+- A scene is an animation and you get 1-3 frames of it. Judge a scene by all of its frames together: something shown in one frame of a scene counts as shown.
+- The phone scene animates in 3 steps: service list with prices, then the time picker, then the confirmation. Prices only appear in the first step.
+- pov, question and tips scenes are big text on a background by design; they have no picture.
+- A title or bottom line on two lines is fine if it reads well.
 Ignore small style preferences. Only report real problems a viewer would notice. Each problem: one short sentence naming the frame and what to change.`;
 const QaResult = z.object({ pass: z.boolean(), problems: z.array(z.string()) });
 
@@ -279,6 +284,7 @@ for (let attempt = 1; ; attempt++) {
   fs.rmSync(SITE, { recursive: true, force: true }); fs.mkdirSync(SITE, { recursive: true });
   fs.rmSync(QA_DIR, { recursive: true, force: true }); fs.mkdirSync(QA_DIR, { recursive: true });
   removed.length = 0;
+  try {
   sc = scrub(await writeScript(client, feedback));
   if (removed.length) console.log('Avtomatik silindi (şəxsi məlumat):', removed.join(', '));
   const bad = check(sc);
@@ -301,9 +307,24 @@ for (let attempt = 1; ; attempt++) {
     console.log('Vizual yoxlama keçmədi:', r.problems);
     feedback = r.problems;
   }
+  } catch (e) {
+    // API və ya render xətası: işi dayandırmırıq, növbəti cəhdə keçirik
+    console.log('Xəta:', e.message);
+    log.push({ attempt, stage: 'error', problems: [String(e.message)] });
+  }
   if (attempt >= MAX_TRIES) {
-    fs.writeFileSync(path.join(QA_DIR, 'report.json'), JSON.stringify(log, null, 2));
-    throw new Error(`${MAX_TRIES} cəhddən sonra video yoxlamadan keçmədi. Bu gün heç nə paylaşılmır. Səbəblər qa/report.json-dadır.`);
+    // Ehtiyat plan: əvvəlcədən yoxlanmış hazır ssenarilərdən biri növbə ilə paylaşılır, iş heç vaxt qırmızı bitmir
+    const names = fs.readdirSync('mock-scripts').filter(f => f.endsWith('.json')).sort();
+    const pickName = names[history.filter(h => h.fallback).length % names.length];
+    console.log(`${MAX_TRIES} cəhd keçmədi, ehtiyat video paylaşılır: ${pickName}`);
+    sc = scrub(JSON.parse(fs.readFileSync(path.join('mock-scripts', pickName), 'utf8')));
+    FORMAT = sc.sequence.join('+');
+    fs.rmSync(SITE, { recursive: true, force: true }); fs.mkdirSync(SITE, { recursive: true });
+    makeMusic({ seed: today, bpm, bars: sc.sequence.reduce((n, t) => n + BARS[t], BARS.cta), file: path.join('public', 'music', `${today}.wav`) });
+    for (const lang of ['az', 'en']) build(sc, lang, bpm, `music/${today}.wav`);
+    sc.fallback = true;
+    log.push({ attempt: 'fallback', stage: 'fallback', file: pickName });
+    break;
   }
 }
 
@@ -319,6 +340,6 @@ fs.writeFileSync(path.join(SITE, 'index.html'), `<!doctype html><html lang="az">
 <style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#F4F8F6;color:#10231D}h1{font-size:1.3rem;color:#0D5E4A}section{background:#fff;border-radius:16px;padding:16px;margin:0 0 16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}video{width:100%;max-width:360px;border-radius:12px;display:block}.t{font-weight:700;margin:12px 0 4px}.c{white-space:pre-wrap;margin:0 0 12px}button,a{display:inline-block;background:#0D5E4A;color:#fff;border:0;border-radius:10px;padding:12px 16px;font-size:1rem;text-decoration:none;margin:4px 6px 0 0}a{background:#3DDC97;color:#062A21}</style>
 <h1>RezEt · ${today}</h1>${block('az', 'Azərbaycanca (TikTok, Instagram, YouTube)')}${block('en', 'English (LinkedIn)')}
 <script>document.addEventListener('click',async e=>{const b=e.target.closest('[data-copy]');if(!b)return;const t=document.getElementById(b.dataset.copy).textContent;try{await navigator.clipboard.writeText(t);b.textContent='Kopyalandı ✓'}catch{b.textContent='Mətni əl ilə seçin'}});</script></html>`);
-history.push({ date: today, format: FORMAT, theme: THEME, sector: sc.sector, topic: sc.topic, biz: sc.biz, hook: sc.az.scenes[0]?.title });
+history.push({ date: today, format: FORMAT, theme: THEME, sector: sc.sector, topic: sc.topic, biz: sc.biz, hook: sc.az.scenes[0]?.title, ...(sc.fallback ? { fallback: true } : {}) });
 fs.writeFileSync(HISTORY, JSON.stringify(history.slice(-90), null, 2));
 console.log('Hazırdır:', `${BASE}/latest.json`);

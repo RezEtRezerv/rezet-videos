@@ -49,7 +49,7 @@ const Bg = ({ theme }) => {
 const Title = ({ text, top = 200, size = 82, delay = 4 }) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   return (
-    <div style={{ position: 'absolute', top, left: 70, right: 70, textAlign: 'center', fontSize: fit(text, size, 34), fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.02em', color: '#fff' }}>
+    <div style={{ position: 'absolute', top, left: 70, right: 70, textAlign: 'center', textWrap: 'balance', fontSize: fit(text, size, 34), fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.02em', color: '#fff' }}>
       {text.split(' ').map((w, i) => {
         const p = spring({ frame: f - delay - i * 5, fps, config: { damping: 15, mass: 0.8 } });
         return <span key={i} style={{ display: 'inline-block', marginRight: '0.25em', opacity: p, transform: `translateY(${(1 - p) * 50}px)`, color: w === '—' ? C.mint : undefined }}>{w}</span>;
@@ -88,7 +88,7 @@ const Line = ({ text, delay = 34 }) => {
   const p = useSpring(delay, { damping: 18 });
   return (
     <div style={{ position: 'absolute', left: 60, right: 60, bottom: 330, display: 'flex', justifyContent: 'center' }}>
-      <div style={{ background: 'rgba(3,20,15,.62)', borderRadius: 26, padding: '20px 34px', fontSize: fit(text, 48, 50), fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.25, opacity: p, transform: `translateY(${(1 - p) * 30}px)` }}>{text}</div>
+      <div style={{ background: 'rgba(3,20,15,.62)', borderRadius: 26, padding: '20px 34px', fontSize: fit(text, 48, 50), fontWeight: 800, color: '#fff', textAlign: 'center', textWrap: 'balance', lineHeight: 1.25, opacity: p, transform: `translateY(${(1 - p) * 30}px)` }}>{text}</div>
     </div>
   );
 };
