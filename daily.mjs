@@ -165,7 +165,8 @@ function build(sc, lang, bpm, musicFile) {
   const scenes = [
     ...v.scenes.map(s => ({
       type: s.type, bars: BARS[s.type], title: s.title, line: s.line, items: s.items,
-      ...(s.type === 'calls' ? { badge: s.items[0] } : {}),
+      // Videoda 3 zəng kartı var, ona görə nişandakı rəqəm həmişə 3 olur
+      ...(s.type === 'calls' ? { badge: String(s.items[0]).replace(/\d+/, '3') } : {}),
       ...(s.type === 'phone' ? { services: s.services, pick: sc.pick, time: sc.time, ok: s.items[0] } : {}),
       ...(s.type === 'cards' ? { icons: sc.icons } : {}),
       biz: sc.biz
