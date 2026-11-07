@@ -113,7 +113,7 @@ const Calls = ({ s, l }) => {
         return (
           <div key={i} style={{ position: 'absolute', left: 110, right: 110, top: 840 + i * 150, height: 124, borderRadius: 30, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', gap: 26, padding: '0 32px', opacity: p, transform: `translateX(${(1 - p) * 300}px) scale(${0.9 + p * 0.1})`, boxShadow: '0 20px 40px rgba(0,0,0,.25)' }}>
             <div style={{ width: 66, height: 66, borderRadius: 18, background: '#FFE8E9', padding: 15 }}>{Ic.phone(C.red)}</div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 36, fontWeight: 800, color: C.ink }}>{l.missed}</div><div style={{ fontSize: 28, color: '#6B7C76', fontWeight: 500 }}>+994 5• ••• •• {['14', '72', '38'][i]}</div></div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 36, fontWeight: 800, color: C.ink }}>{l.missed}</div><div style={{ fontSize: 28, color: '#6B7C76', fontWeight: 500 }}>{l.caller}</div></div>
             <div style={{ fontSize: 30, color: '#6B7C76', fontWeight: 700 }}>{['10:02', '10:15', '10:31'][i]}</div>
           </div>
         );
@@ -345,8 +345,8 @@ const Cta = ({ s, url }) => {
 };
 
 export const L = {
-  az: { missed: 'Buraxılmış zəng', choose: 'Xidmət seçin', chooseTime: 'Vaxt seçin · Sabah', confirm: 'Təsdiqlə', tomorrow: 'Sabah', emailSent: 'Təsdiq e-poçta göndərildi', cur: 'AZN', before: 'Əvvəl', after: 'RezEt ilə', today: 'Bu gün', confirmed: 'Təsdiq', came: 'Gəldi', verified: 'Təsdiqlənmiş müştəri' },
-  en: { missed: 'Missed call', choose: 'Choose a service', chooseTime: 'Pick a time · Tomorrow', confirm: 'Confirm', tomorrow: 'Tomorrow', emailSent: 'Confirmation sent by email', cur: 'AZN', before: 'Before', after: 'With RezEt', today: 'Today', confirmed: 'Confirmed', came: 'Arrived', verified: 'Verified customer' }
+  az: { missed: 'Buraxılmış zəng', choose: 'Xidmət seçin', chooseTime: 'Vaxt seçin · Sabah', confirm: 'Təsdiqlə', tomorrow: 'Sabah', emailSent: 'Təsdiq e-poçta göndərildi', cur: 'AZN', before: 'Əvvəl', after: 'RezEt ilə', today: 'Bu gün', confirmed: 'Təsdiq', came: 'Gəldi', verified: 'Təsdiqlənmiş müştəri', caller: 'Yeni müştəri' },
+  en: { missed: 'Missed call', choose: 'Choose a service', chooseTime: 'Pick a time · Tomorrow', confirm: 'Confirm', tomorrow: 'Tomorrow', emailSent: 'Confirmation sent by email', cur: 'AZN', before: 'Before', after: 'With RezEt', today: 'Today', confirmed: 'Confirmed', came: 'Arrived', verified: 'Verified customer', caller: 'New client' }
 };
 const SCENES = { calls: Calls, question: Question, phone: Phone, cards: Cards, beforeAfter: BeforeAfter, panel: Panel, tips: Tips, review: Review, cta: Cta };
 
