@@ -19,25 +19,29 @@ const HISTORY = 'history.json';
 const history = fs.existsSync(HISTORY) ? JSON.parse(fs.readFileSync(HISTORY, 'utf8')) : [];
 const SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '15:30', '16:00'];
 const ICONS = ['cal', 'mail', 'star', 'clock', 'chart', 'users'];
-// Mətni ən güclü model (Opus) yazır, kadrları ucuz model (Haiku) yoxlayır. Xərc: ayda təxminən 1-2.2 dollar (5 dollar ~2-3 aya çatır).
-const MODEL_WRITE = 'claude-opus-5-5', MODEL_CHECK = 'claude-haiku-5-5';
+// Mətni ən güclü model (Opus, yüksək səy) yazır, kadrları Sonnet yoxlayır (Azərbaycan mətnini şəkildə daha dəqiq oxuyur).
+// Xərc: ayda təxminən 2-3 dollar.
+const MODEL_WRITE = 'claude-opus-5-5', MODEL_CHECK = 'claude-sonnet-5-5';
 const isWin = process.platform === 'win32';
 const npx = (args, opts = {}) => execFileSync(isWin ? 'npx.cmd' : 'npx', args, { stdio: 'inherit', shell: isWin, ...opts });
 
-// 4 video formatı gün-gün növbə ilə gəlir, hər formatın öz səhnələri var
-const FORMATS = {
-  problem: ['calls', 'phone', 'cards'],
-  beforeAfter: ['question', 'beforeAfter', 'panel'],
-  tips: ['question', 'tips', 'phone'],
-  story: ['calls', 'panel', 'review']
-};
-const BARS = { calls: 3, question: 2, phone: 4, cards: 3, beforeAfter: 4, panel: 3, tips: 4, review: 3, cta: 3 };
+// Səhnə növləri: Claude hər gün 3-nü özü seçib birləşdirir (ilk səhnə "hook", ən azı biri məhsulu göstərir)
+const TYPES = ['calls', 'question', 'pov', 'chat', 'phone', 'panel', 'notifications', 'calendar', 'cards', 'beforeAfter', 'tips', 'review'];
+const HOOKS = ['calls', 'question', 'pov', 'chat'];
+const PRODUCT = ['phone', 'panel', 'notifications', 'calendar'];
+const BARS = { calls: 3, question: 2, pov: 2, chat: 4, phone: 4, panel: 3, notifications: 3, calendar: 3, cards: 3, beforeAfter: 4, tips: 4, review: 3, cta: 3 };
 const dayNo = Math.floor(Date.parse(today) / 864e5);
-const FORMAT = MOCK || Object.keys(FORMATS)[dayNo % 4];
+const THEME = ['forest', 'midnight', 'sunset', 'plum'][dayNo % 4]; // hər gün fərqli fon rəngi
+const WEEKDAYS = {
+  az: ['Bazar', 'Bazar ertəsi', 'Çərşənbə axşamı', 'Çərşənbə', 'Cümə axşamı', 'Cümə', 'Şənbə'],
+  en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+};
+const weekdayNo = new Date(today + 'T12:00:00Z').getUTCDay();
+let FORMAT = MOCK || '';
 
 /* ---------- 1. Ssenari ---------- */
 const Scene = z.object({
-  type: z.enum(['calls', 'question', 'phone', 'cards', 'beforeAfter', 'panel', 'tips', 'review']),
+  type: z.enum(TYPES),
   title: z.string(),
   line: z.string(),
   items: z.array(z.string()),
@@ -52,10 +56,13 @@ const Lang = z.object({
 });
 const Script = z.object({
   topic: z.string().describe('One-line topic of today in English'),
+  angle: z.string().describe('In one short English line: the creative angle / hook idea and why it will stop the scroll'),
+  sequence: z.array(z.enum(TYPES)).describe('Exactly 3 scene types in order'),
   sector: z.enum(['barber', 'beauty', 'clinic', 'restaurant', 'tour']),
   biz: z.string().describe('Invented business name, max 22 characters'),
   pick: z.number().int().describe('Index 0-2 of the service the customer picks in the phone scene'),
-  time: z.enum(SLOTS),
+  time: z.enum(SLOTS).describe('The appointment time the customer books (shown in the phone)'),
+  bookedAt: z.string().describe('HH:MM clock time WHEN the customer makes the booking (shown on the phone status bar and lock screen), e.g. "23:10" for a late-night booking'),
   icons: z.array(z.enum(ICONS)).describe('Exactly 3 icons matching the 3 benefit items of a cards scene, in order'),
   az: Lang,
   en: Lang
@@ -64,20 +71,36 @@ const Script = z.object({
 const SYSTEM = `You write daily short vertical promo videos (Instagram Reels, YouTube Shorts, Facebook, LinkedIn) for RezEt, an online booking platform for businesses in Azerbaijan.
 What RezEt does: customers book online 24/7 without calling; they get email confirmation and an email reminder 2 hours before; the business manages bookings, staff schedules, closed days and customers in one panel; verified customer reviews with stars; waitlist emails when a slot frees up; a free plan exists.
 
-Each video = 3 scenes you write + a fixed RezEt logo ending. Scene types and how to fill them (unused fields: empty string or empty array):
-- calls: title = short problem hook (max 42 chars); line = max 55 chars; items = [badge like "3 missed calls" (max 22)].
+Each video = 3 scenes you choose and write (the "sequence") + a fixed RezEt logo ending.
+Sequence rules: scene 1 must be a hook type (calls, question, pov, chat); at least one scene must show the product (phone, panel, notifications, calendar); no scene type twice; do not reuse a recent sequence.
+Scene types and how to fill them (unused fields: empty string or empty array):
+- calls: three missed-call cards. title = short problem hook (max 42 chars); line = max 55 chars; items = [badge "3 missed calls" (the number is always 3)].
 - question: title = a sharp question to the viewer (max 48); line = max 55; items = [].
+- pov: big bold "POV:" statement that puts the viewer in a situation, e.g. "you answer the phone with dye on your hands" (title max 52, no "POV" word in it); line max 55; items = [].
+- chat: a short messenger exchange. title max 40; line max 50; items = [customer message (max 60), business reply (max 60), small label between them like "3 hours later" or "1 second later" (max 20)].
+- notifications: phone lock screen with 3 RezEt notifications. title max 40; line max 50; items = exactly 3 short notifications (max 34 each), e.g. "New booking: Leyla M." / "Reminder sent to client" / "New 5-star review".
+- calendar: the business's week calendar filling up with bookings (visual only). title max 40; line max 50; items = [].
 - phone: a customer books on a phone. title max 40; line max 50; services = exactly 3 services of the business {name max 20, price in AZN}; items = [confirmation text like "Booking confirmed" (max 24)].
 - cards: title max 26; line max 50; items = exactly 3 RezEt benefits (max 28 each).
 - beforeAfter: title max 40; line max 50; items = exactly 6: first 3 = problems before (max 28), last 3 = the same things solved with RezEt (max 28).
 - panel: the owner's panel with today's bookings. title max 40; line max 50; items = exactly 3 bookings formatted "First name + surname initial · Service · HH:MM" (e.g. "Leyla M. · Manicure · 10:30"), times ascending.
 - tips: title like "3 ways to …" (max 40); line max 50; items = exactly 3 practical, useful tips for business owners (max 44 each); at least one tip is solved by RezEt.
-- review: title max 40; line max 50; items = [reviewer "First name + surname initial" (max 16), a short realistic customer review of the business (max 90)].
+- review: a 5-star review card (always 5 stars). title max 40; line max 50; items = [reviewer "First name + surname initial" (max 16), a short realistic customer review of the business (max 90)].
 
-Rules:
-- Write the Azerbaijani version first (natural, correct Azerbaijani with ə, ğ, ı, ö, ü, ş, ç), then the English version for LinkedIn (natural professional English, not a literal translation). Both versions use the same scene types in the same order.
-- Make the first scene a strong hook: specific, relatable, creates curiosity in 2 seconds. No clichés like "Welcome" or "Do you want to grow?".
-- Every video must feel fresh: new angle, new situation, new wording. Rotate sectors. Do not repeat a recent topic, hook or business name.
+Goal: videos that Azerbaijani business owners and their customers stop scrolling for, watch to the end and share.
+Creative rules:
+- The first 2 seconds decide everything. Use a specific, relatable, slightly surprising hook from real life in Azerbaijan (a barber with clippers in hand while the phone rings, a clinic receptionist with a queue, a restaurant on a Friday night, a salon before a wedding, a tour guide on a bus). Use light humour, a twist, a bold POV or a sharp question. No clichés like "Welcome" or "Do you want to grow?".
+- Use the date: if a holiday, season or typical busy period is near (Novruz, weddings season, New Year, school start, summer trips, Friday evenings), you may build the idea around it. Never political, religious or controversial topics.
+- Every video must feel completely new: new situation, new sector, new sequence, new wording, new joke. Never repeat a recent hook, topic, sequence or business name.
+- No emoji in on-screen texts (they may not render). Emoji are fine in the caption.
+- Keep each on-screen text short and punchy. One idea per scene. The story must flow: problem, solution with RezEt, payoff.
+- The caption starts with a strong first line, then 1-2 short sentences, then 6-10 relevant hashtags mixing Azerbaijani and local tags (e.g. #bakı #azərbaycan #biznes plus sector tags).
+Consistency rules (the video is checked automatically):
+- Text and visuals must always match. If you mention a clock time anywhere, it must be exactly "time" (the appointment) or "bookedAt" (when the customer books). Panel booking times are only the panel's own list.
+- Counts must match what is shown: calls always show 3 missed calls, tips always 3 tips, cards always 3 items, reviews always 5 stars.
+- The service the customer picks (services[pick]) and its price must match any mention in the texts.
+Language rules:
+- Write the Azerbaijani version first (natural, correct, modern spoken Azerbaijani with ə, ğ, ı, ö, ü, ş, ç), then the English version for LinkedIn (natural professional English, not a literal translation). Both versions use the same scene types in the same order.
 - The business must have an invented name that does not exist: a coined word plus a type, like "Nərvix Barber Studio" or "Lumora Clinic". Never use real brands or common generic names. People's names are invented too.
 - No website links, URLs, phone numbers, emails or social handles anywhere.
 - No invented statistics, percentages, prices for RezEt, or promises RezEt cannot keep. No competitor names.
@@ -85,17 +108,16 @@ Rules:
 
 async function writeScript(client, feedback) {
   if (MOCK) return JSON.parse(fs.readFileSync(`mock-scripts/${MOCK}.json`, 'utf8'));
-  const recent = history.slice(-30).map(h => `${h.date}: ${h.format || '-'} | ${h.sector} | ${h.topic} | ${h.biz}`).join('\n') || 'none yet';
-  const need = FORMATS[FORMAT].join(', ');
-  const fix = feedback ? `\n\nA previous attempt today FAILED the visual quality check. Fix these problems (usually by using shorter, clearer text):\n- ${feedback.join('\n- ')}` : '';
+  const recent = history.slice(-30).map(h => `${h.date}: ${h.format || '-'} | ${h.sector} | ${h.topic} | ${h.biz}${h.hook ? ' | hook: ' + h.hook : ''}`).join('\n') || 'none yet';
+  const fix = feedback ? `\n\nA previous attempt today FAILED the automatic checks. Fix these problems:\n- ${feedback.join('\n- ')}` : '';
   const res = await client.beta.messages.parse({
     model: MODEL_WRITE,
-    max_tokens: 16000,
+    max_tokens: 32000,
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
-    output_config: { effort: 'medium', format: betaZodOutputFormat(Script) },
+    output_config: { effort: 'high', format: betaZodOutputFormat(Script) },
     system: SYSTEM,
-    messages: [{ role: 'user', content: `Date: ${today}.\nToday's scene types, in this order: ${need}.\nRecent videos (avoid repeating them):\n${recent}${fix}\n\nWrite today's video.` }]
+    messages: [{ role: 'user', content: `Date: ${today} (${WEEKDAYS.en[weekdayNo]}).\nRecent videos (do not repeat their hooks, topics, sequences or names):\n${recent}${fix}\n\nWrite today's video.` }]
   });
   if (res.stop_reason === 'refusal') throw new Error('Claude bu gün ssenari yazmaqdan imtina etdi');
   if (!res.parsed_output) throw new Error('Claude cavabı JSON kimi oxunmadı');
@@ -127,20 +149,38 @@ function scrub(v, where = '') {
   return v;
 }
 const NO_LINKS = /(https?:\/\/|www\.|[\w.+-]+@[\w-]+\.\w|\+\d{6,})/i;
-const LIMITS = { calls: [42, 55, 1, 22], question: [48, 55, 0, 0], phone: [40, 50, 1, 24], cards: [26, 50, 3, 28], beforeAfter: [40, 50, 6, 28], panel: [40, 50, 3, 40], tips: [40, 50, 3, 44], review: [40, 50, 2, 90] };
+const LIMITS = { calls: [42, 55, 1, 22], question: [48, 55, 0, 0], pov: [52, 55, 0, 0], chat: [40, 50, 3, 60], phone: [40, 50, 1, 24], panel: [40, 50, 3, 40], notifications: [40, 50, 3, 34], calendar: [40, 50, 0, 0], cards: [26, 50, 3, 28], beforeAfter: [40, 50, 6, 28], tips: [40, 50, 3, 44], review: [40, 50, 2, 90] };
+const TIME_RE = /\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/g;
+const hhmm = t => { const m = String(t).match(/^([01]?\d|2[0-3])[:.]([0-5]\d)$/); return m ? `${m[1].padStart(2, '0')}:${m[2]}` : null; };
 function check(sc) {
   const bad = [];
   if (!sc.biz || sc.biz.length > 26) bad.push('biz name');
   sc.biz = cut(sc.biz, 26);
   if (!Number.isInteger(sc.pick) || sc.pick < 0 || sc.pick > 2) sc.pick = 1;
   if (!SLOTS.includes(sc.time)) sc.time = '10:30';
+  sc.bookedAt = hhmm(sc.bookedAt) || sc.time;
   sc.icons = (sc.icons || []).filter(i => ICONS.includes(i)).slice(0, 3);
   while (sc.icons.length < 3) sc.icons.push(['cal', 'mail', 'star'][sc.icons.length]);
+  // Səhnə ardıcıllığı: 3 səhnə, ilki "hook", ən azı biri məhsulu göstərir, təkrar yoxdur, son 5 günün ardıcıllığı təkrarlanmır
+  const seq = (sc.sequence || []).slice(0, 3);
+  if (seq.length !== 3 || new Set(seq).size !== 3) bad.push('sequence must be exactly 3 different scene types');
+  if (!HOOKS.includes(seq[0])) bad.push(`scene 1 must be one of: ${HOOKS.join(', ')}`);
+  if (!seq.some(t => PRODUCT.includes(t))) bad.push(`at least one scene must be one of: ${PRODUCT.join(', ')}`);
+  if (!MOCK && history.slice(-5).some(h => h.format === seq.join('+'))) bad.push(`sequence ${seq.join('+')} was used in the last 5 days, choose another`);
+  sc.sequence = seq;
+  FORMAT = seq.join('+');
   for (const k of ['az', 'en']) {
     const v = sc[k];
     if (NO_LINKS.test(JSON.stringify(v))) bad.push(k + ': contains a link');
     const types = (v.scenes || []).map(s => s.type).join(',');
-    if (types !== FORMATS[FORMAT].join(',')) { bad.push(`${k}: scenes must be ${FORMATS[FORMAT].join(', ')} (got ${types})`); continue; }
+    if (types !== seq.join(',')) { bad.push(`${k}: scenes must be ${seq.join(', ')} (got ${types})`); continue; }
+    // Mətn və görüntü uyğun olmalıdır: mətndəki hər saat ya rezerv vaxtı, ya rezerv edilən an, ya da paneldəki vaxtdır
+    const panelTimes = v.scenes.filter(s => s.type === 'panel').flatMap(s => (s.items || []).map(x => hhmm((x.match(TIME_RE) || [])[0] || '')));
+    const allowed = new Set([sc.time, sc.bookedAt, ...panelTimes].filter(Boolean));
+    for (const s of v.scenes) {
+      const texts = [s.title, s.line, ...(s.type === 'panel' ? [] : s.items || [])];
+      for (const t of texts.join(' ').match(TIME_RE) || []) if (!allowed.has(hhmm(t))) bad.push(`${k} ${s.type}: the text says ${t}, but the video shows ${[...allowed].join(' / ')}. Times in text must match the video.`);
+    }
     for (const s of v.scenes) {
       const [tMax, lMax, nItems, iMax] = LIMITS[s.type];
       s.title = cut(s.title, tMax + 6); s.line = cut(s.line, lMax + 6);
@@ -169,11 +209,11 @@ function build(sc, lang, bpm, musicFile) {
       ...(s.type === 'calls' ? { badge: String(s.items[0]).replace(/\d+/, '3') } : {}),
       ...(s.type === 'phone' ? { services: s.services, pick: sc.pick, time: sc.time, ok: s.items[0] } : {}),
       ...(s.type === 'cards' ? { icons: sc.icons } : {}),
-      biz: sc.biz
+      biz: sc.biz, bookedAt: sc.bookedAt, weekday: WEEKDAYS[lang][weekdayNo]
     })),
     { type: 'cta', bars: BARS.cta, title: 'RezEt', sub: v.ctaSub, button: v.ctaButton }
   ].map(s => ({ ...s, frames: Math.round(s.bars * barF) + T }));
-  const props = { id: `${today}-${lang}`, lang, scenes, music: musicFile };
+  const props = { id: `${today}-${lang}`, lang, scenes, music: musicFile, theme: THEME };
   const pf = `props-${lang}.json`;
   fs.writeFileSync(pf, JSON.stringify(props, null, 2));
   const out = path.join(SITE, `${today}-${lang}.mp4`);
@@ -187,7 +227,7 @@ function frames(lang, video, scenes) {
   let start = 0;
   scenes.forEach((s, i) => {
     const from = start + (i ? T : 0), len = s.frames - (i ? T : 0);
-    const points = s.type === 'phone' ? [0.5, 0.88] : [0.88];
+    const points = s.type === 'phone' ? [0.5, 0.88] : s.type === 'chat' ? [0.4, 0.92] : [0.9];
     for (const p of points) shots.push({ label: `${lang} scene ${i + 1} (${s.type})`, t: (from + len * p) / FPS });
     start += s.frames - T;
   });
@@ -205,7 +245,8 @@ Fail the video if you see ANY of these:
 - spelling or grammar mistakes, unnatural phrasing, mixed languages in one version, or text that does not make sense;
 - a business or person name that looks like a real, well-known brand;
 - any URL, website, phone number (even partly hidden), email, social handle, street address, ID or card number, or a person's full real-looking name (only first name + surname initial is allowed);
-- content that does not fit the business sector or is misleading.
+- content that does not fit the business sector or is misleading;
+- any mismatch between the texts and the visuals: a time, number, name, service or price in a title or bottom line that differs from what the phone, panel, cards or notifications show (for example the title says 23:00 but the phone clock or booking shows 11:00, or "4 missed calls" while 3 are shown).
 Ignore small style preferences. Only report real problems a viewer would notice. Each problem: one short sentence naming the frame and what to change.`;
 const QaResult = z.object({ pass: z.boolean(), problems: z.array(z.string()) });
 
@@ -232,7 +273,6 @@ async function review(client, sc, shots) {
 const client = MOCK ? null : new Anthropic();
 fs.mkdirSync(path.join('public', 'music'), { recursive: true });
 const bpm = 96 + (dayNo % 11); // hər gün bir az fərqli temp
-makeMusic({ seed: today, bpm, bars: Object.values(FORMATS[FORMAT]).reduce((n, t) => n + BARS[t], BARS.cta), file: path.join('public', 'music', `${today}.wav`) });
 
 let sc, feedback = null, log = [];
 for (let attempt = 1; ; attempt++) {
@@ -248,6 +288,8 @@ for (let attempt = 1; ; attempt++) {
     log.push({ attempt, stage: 'text', problems: bad });
     feedback = bad;
   } else {
+    // Musiqi seçilən səhnələrin uzunluğuna görə yaradılır
+    makeMusic({ seed: today, bpm, bars: sc.sequence.reduce((n, t) => n + BARS[t], BARS.cta), file: path.join('public', 'music', `${today}.wav`) });
     const shots = [];
     for (const lang of ['az', 'en']) {
       const { out, scenes } = build(sc, lang, bpm, `music/${today}.wav`);
@@ -277,6 +319,6 @@ fs.writeFileSync(path.join(SITE, 'index.html'), `<!doctype html><html lang="az">
 <style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#F4F8F6;color:#10231D}h1{font-size:1.3rem;color:#0D5E4A}section{background:#fff;border-radius:16px;padding:16px;margin:0 0 16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}video{width:100%;max-width:360px;border-radius:12px;display:block}.t{font-weight:700;margin:12px 0 4px}.c{white-space:pre-wrap;margin:0 0 12px}button,a{display:inline-block;background:#0D5E4A;color:#fff;border:0;border-radius:10px;padding:12px 16px;font-size:1rem;text-decoration:none;margin:4px 6px 0 0}a{background:#3DDC97;color:#062A21}</style>
 <h1>RezEt · ${today}</h1>${block('az', 'Azərbaycanca (TikTok, Instagram, YouTube)')}${block('en', 'English (LinkedIn)')}
 <script>document.addEventListener('click',async e=>{const b=e.target.closest('[data-copy]');if(!b)return;const t=document.getElementById(b.dataset.copy).textContent;try{await navigator.clipboard.writeText(t);b.textContent='Kopyalandı ✓'}catch{b.textContent='Mətni əl ilə seçin'}});</script></html>`);
-history.push({ date: today, format: FORMAT, sector: sc.sector, topic: sc.topic, biz: sc.biz });
+history.push({ date: today, format: FORMAT, theme: THEME, sector: sc.sector, topic: sc.topic, biz: sc.biz, hook: sc.az.scenes[0]?.title });
 fs.writeFileSync(HISTORY, JSON.stringify(history.slice(-90), null, 2));
 console.log('Hazırdır:', `${BASE}/latest.json`);

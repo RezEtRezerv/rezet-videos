@@ -4,12 +4,55 @@
   "biz": "Nərvix Barber Studio",
   "pick": 1,
   "time": "10:30",
-  "icons": ["cal", "mail", "star"],
+  "icons": [
+    "cal",
+    "mail",
+    "star"
+  ],
   "az": {
     "scenes": [
-      { "type": "calls", "title": "Hər buraxılmış zəng — itirilmiş müştəri", "line": "Siz müştəri ilə məşğulsunuz, telefon isə susmur.", "items": ["3 buraxılmış zəng"], "services": [] },
-      { "type": "phone", "title": "Müştəriləriniz özləri rezerv etsin", "line": "Zəng etmədən. Günün istənilən saatında.", "items": ["Rezerv təsdiqləndi"], "services": [{ "name": "Saç kəsimi", "price": 15 }, { "name": "Saç və saqqal", "price": 25 }, { "name": "Uşaq saç kəsimi", "price": 10 }] },
-      { "type": "cards", "title": "Hər şey avtomatik", "line": "Bütün rezervlər bir paneldə.", "items": ["7/24 onlayn rezerv", "E-poçtla təsdiq və xatırlatma", "Rəylər və ulduzlar"], "services": [] }
+      {
+        "type": "calls",
+        "title": "Hər buraxılmış zəng — itirilmiş müştəri",
+        "line": "Siz müştəri ilə məşğulsunuz, telefon isə susmur.",
+        "items": [
+          "3 buraxılmış zəng"
+        ],
+        "services": []
+      },
+      {
+        "type": "phone",
+        "title": "Müştəriləriniz özləri rezerv etsin",
+        "line": "Zəng etmədən. Günün istənilən saatında.",
+        "items": [
+          "Rezerv təsdiqləndi"
+        ],
+        "services": [
+          {
+            "name": "Saç kəsimi",
+            "price": 15
+          },
+          {
+            "name": "Saç və saqqal",
+            "price": 25
+          },
+          {
+            "name": "Uşaq saç kəsimi",
+            "price": 10
+          }
+        ]
+      },
+      {
+        "type": "cards",
+        "title": "Hər şey avtomatik",
+        "line": "Bütün rezervlər bir paneldə.",
+        "items": [
+          "7/24 onlayn rezerv",
+          "E-poçtla təsdiq və xatırlatma",
+          "Rəylər və ulduzlar"
+        ],
+        "services": []
+      }
     ],
     "ctaSub": "Bizneslər üçün onlayn rezerv",
     "ctaButton": "Pulsuz başlayın",
@@ -18,13 +61,59 @@
   },
   "en": {
     "scenes": [
-      { "type": "calls", "title": "Every missed call is a lost client", "line": "You're with a client. The phone keeps ringing.", "items": ["3 missed calls"], "services": [] },
-      { "type": "phone", "title": "Let clients book themselves", "line": "No calls. Any time of day.", "items": ["Booking confirmed"], "services": [{ "name": "Haircut", "price": 15 }, { "name": "Hair and beard", "price": 25 }, { "name": "Kids haircut", "price": 10 }] },
-      { "type": "cards", "title": "All automatic", "line": "Every booking in one panel.", "items": ["24/7 online booking", "Email confirmations", "Verified reviews"], "services": [] }
+      {
+        "type": "calls",
+        "title": "Every missed call is a lost client",
+        "line": "You're with a client. The phone keeps ringing.",
+        "items": [
+          "3 missed calls"
+        ],
+        "services": []
+      },
+      {
+        "type": "phone",
+        "title": "Let clients book themselves",
+        "line": "No calls. Any time of day.",
+        "items": [
+          "Booking confirmed"
+        ],
+        "services": [
+          {
+            "name": "Haircut",
+            "price": 15
+          },
+          {
+            "name": "Hair and beard",
+            "price": 25
+          },
+          {
+            "name": "Kids haircut",
+            "price": 10
+          }
+        ]
+      },
+      {
+        "type": "cards",
+        "title": "All automatic",
+        "line": "Every booking in one panel.",
+        "items": [
+          "24/7 online booking",
+          "Email confirmations",
+          "Verified reviews"
+        ],
+        "services": []
+      }
     ],
     "ctaSub": "Online booking for businesses",
     "ctaButton": "Start for free",
     "title": "Missed calls mean lost clients — online booking with RezEt",
     "caption": "Every call you can't answer can cost you a client. With RezEt, clients book online 24/7. #SmallBusiness #OnlineBooking"
-  }
+  },
+  "sequence": [
+    "calls",
+    "phone",
+    "cards"
+  ],
+  "angle": "test",
+  "bookedAt": "10:30"
 }

@@ -4,12 +4,53 @@
   "biz": "Velorin Dental Clinic",
   "pick": 2,
   "time": "09:30",
-  "icons": ["clock", "mail", "users"],
+  "icons": [
+    "clock",
+    "mail",
+    "users"
+  ],
   "az": {
     "scenes": [
-      { "type": "question", "title": "Pasiyentlər qəbula niyə gəlmir?", "line": "Çox vaxt sadəcə unudurlar.", "items": [], "services": [] },
-      { "type": "tips", "title": "Gəlməyənləri azaltmağın 3 yolu", "line": "Üçüncüsünü RezEt özü edir.", "items": ["Qəbul vaxtını əvvəlcədən təsdiqləyin", "Ləğv etməyi asan edin", "Qəbuldan 2 saat əvvəl xatırladın"], "services": [] },
-      { "type": "phone", "title": "Pasiyent onlayn özü yazılır", "line": "Təsdiq və xatırlatma avtomatik gedir.", "items": ["Qəbul təsdiqləndi"], "services": [{ "name": "Müayinə", "price": 20 }, { "name": "Diş təmizliyi", "price": 50 }, { "name": "Plomb", "price": 60 }] }
+      {
+        "type": "question",
+        "title": "Pasiyentlər qəbula niyə gəlmir?",
+        "line": "Çox vaxt sadəcə unudurlar.",
+        "items": [],
+        "services": []
+      },
+      {
+        "type": "tips",
+        "title": "Gəlməyənləri azaltmağın 3 yolu",
+        "line": "Üçüncüsünü RezEt özü edir.",
+        "items": [
+          "Qəbul vaxtını əvvəlcədən təsdiqləyin",
+          "Ləğv etməyi asan edin",
+          "Qəbuldan 2 saat əvvəl xatırladın"
+        ],
+        "services": []
+      },
+      {
+        "type": "phone",
+        "title": "Pasiyent onlayn özü yazılır",
+        "line": "Təsdiq və xatırlatma avtomatik gedir.",
+        "items": [
+          "Qəbul təsdiqləndi"
+        ],
+        "services": [
+          {
+            "name": "Müayinə",
+            "price": 20
+          },
+          {
+            "name": "Diş təmizliyi",
+            "price": 50
+          },
+          {
+            "name": "Plomb",
+            "price": 60
+          }
+        ]
+      }
     ],
     "ctaSub": "Klinikalar üçün onlayn qəbul",
     "ctaButton": "Pulsuz başlayın",
@@ -18,13 +59,57 @@
   },
   "en": {
     "scenes": [
-      { "type": "question", "title": "Why do patients miss appointments?", "line": "Most of the time, they simply forget.", "items": [], "services": [] },
-      { "type": "tips", "title": "3 ways to cut no-shows", "line": "RezEt does the third one for you.", "items": ["Confirm every appointment in advance", "Make cancelling easy", "Send a reminder 2 hours before"], "services": [] },
-      { "type": "phone", "title": "Patients book online themselves", "line": "Confirmation and reminder go out automatically.", "items": ["Appointment confirmed"], "services": [{ "name": "Check-up", "price": 20 }, { "name": "Teeth cleaning", "price": 50 }, { "name": "Filling", "price": 60 }] }
+      {
+        "type": "question",
+        "title": "Why do patients miss appointments?",
+        "line": "Most of the time, they simply forget.",
+        "items": [],
+        "services": []
+      },
+      {
+        "type": "tips",
+        "title": "3 ways to cut no-shows",
+        "line": "RezEt does the third one for you.",
+        "items": [
+          "Confirm every appointment in advance",
+          "Make cancelling easy",
+          "Send a reminder 2 hours before"
+        ],
+        "services": []
+      },
+      {
+        "type": "phone",
+        "title": "Patients book online themselves",
+        "line": "Confirmation and reminder go out automatically.",
+        "items": [
+          "Appointment confirmed"
+        ],
+        "services": [
+          {
+            "name": "Check-up",
+            "price": 20
+          },
+          {
+            "name": "Teeth cleaning",
+            "price": 50
+          },
+          {
+            "name": "Filling",
+            "price": 60
+          }
+        ]
+      }
     ],
     "ctaSub": "Online appointments for clinics",
     "ctaButton": "Start for free",
     "title": "3 ways clinics can reduce missed appointments | RezEt",
     "caption": "A missed appointment is an empty slot. These 3 steps help, and RezEt sends the reminder automatically. #Healthcare #SmallBusiness #OnlineBooking"
-  }
+  },
+  "sequence": [
+    "question",
+    "tips",
+    "phone"
+  ],
+  "angle": "test",
+  "bookedAt": "09:30"
 }

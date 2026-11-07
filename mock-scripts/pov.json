@@ -1,0 +1,113 @@
+{
+  "topic": "Late-night bookings at a nail studio",
+  "angle": "test",
+  "sector": "barber",
+  "biz": "Tornavi Barber House",
+  "pick": 1,
+  "time": "14:00",
+  "bookedAt": "13:40",
+  "icons": [
+    "cal",
+    "mail",
+    "star"
+  ],
+  "sequence": [
+    "pov",
+    "phone",
+    "review"
+  ],
+  "az": {
+    "scenes": [
+      {
+        "type": "pov",
+        "title": "əlində maşınka, telefon isə susmur",
+        "line": "Müştərini saxlasan, zəngi itirirsən.",
+        "items": [],
+        "services": []
+      },
+      {
+        "type": "phone",
+        "title": "Müştəri 13:40-da özü yazılır",
+        "line": "Saat 14:00 artıq onundur.",
+        "items": [
+          "Rezerv təsdiqləndi"
+        ],
+        "services": [
+          {
+            "name": "Saç kəsimi",
+            "price": 15
+          },
+          {
+            "name": "Saç və saqqal",
+            "price": 25
+          },
+          {
+            "name": "Uşaq saç kəsimi",
+            "price": 10
+          }
+        ]
+      },
+      {
+        "type": "review",
+        "title": "Və nəticə belə olur",
+        "line": "Təsdiqlənmiş rəylər yeni müştəri gətirir.",
+        "items": [
+          "Orxan T.",
+          "Saat 14:00-da gəldim, gözləmədən oturdum. Əla xidmət!"
+        ],
+        "services": []
+      }
+    ],
+    "ctaSub": "Bizneslər üçün onlayn rezerv",
+    "ctaButton": "Pulsuz başlayın",
+    "title": "POV: əlində maşınka, telefon zəng çalır | RezEt",
+    "caption": "Hər zəngə cavab vermək mümkün deyil. RezEt ilə müştəri özü yazılır. #RezEt #bərbər #bakı #azərbaycan #biznes #salon"
+  },
+  "en": {
+    "scenes": [
+      {
+        "type": "pov",
+        "title": "clippers in hand, phone ringing nonstop",
+        "line": "Serve the client, lose the call.",
+        "items": [],
+        "services": []
+      },
+      {
+        "type": "phone",
+        "title": "At 13:40 a client books himself",
+        "line": "14:00 is now his.",
+        "items": [
+          "Booking confirmed"
+        ],
+        "services": [
+          {
+            "name": "Haircut",
+            "price": 15
+          },
+          {
+            "name": "Hair and beard",
+            "price": 25
+          },
+          {
+            "name": "Kids haircut",
+            "price": 10
+          }
+        ]
+      },
+      {
+        "type": "review",
+        "title": "And this is the result",
+        "line": "Verified reviews bring new clients.",
+        "items": [
+          "Orkhan T.",
+          "Came at 14:00 and sat down right away. Great service!"
+        ],
+        "services": []
+      }
+    ],
+    "ctaSub": "Online booking for businesses",
+    "ctaButton": "Start for free",
+    "title": "POV: clippers in hand, phone ringing | RezEt",
+    "caption": "You cannot answer every call. With RezEt clients book themselves. #Barber #SmallBusiness #OnlineBooking"
+  }
+}

@@ -22,16 +22,24 @@ const useSpring = (delay = 0, config = { damping: 14, mass: 0.7 }) => {
 };
 
 /* ---------- fon: tünd yaşıl, yavaş hərəkət edən işıq ləkələri ---------- */
-const Bg = () => {
+// Rəng mövzuları: hər gün fərqli fon, brend yaşılı (vurğu rəngi) dəyişmir
+export const THEMES = {
+  forest: { a: '#0B4D3D', b: '#062A21', blobs: ['#1E8F6E', '#0F6B53', '#3DDC9740'] },
+  midnight: { a: '#16294A', b: '#070D1C', blobs: ['#2B5DA8', '#1B3A6B', '#3DDC9733'] },
+  sunset: { a: '#5B2C22', b: '#1C0E0A', blobs: ['#C2593A', '#7A3424', '#F5B83D40'] },
+  plum: { a: '#3B2152', b: '#12091C', blobs: ['#7B4BB0', '#4A2A6E', '#3DDC9733'] }
+};
+const Bg = ({ theme }) => {
+  const th = THEMES[theme] || THEMES.forest;
   const f = useCurrentFrame();
   const blob = (x, y, r, c, sp, ph) => (
     <div style={{ position: 'absolute', left: x + Math.sin(f / sp + ph) * 120, top: y + Math.cos(f / (sp * 1.3) + ph) * 140, width: r, height: r, borderRadius: '50%', background: c, filter: 'blur(120px)', opacity: 0.55 }} />
   );
   return (
-    <AbsoluteFill style={{ background: `linear-gradient(165deg, #0B4D3D 0%, ${C.deep} 70%)`, overflow: 'hidden' }}>
-      {blob(-200, 100, 700, '#1E8F6E', 70, 0)}
-      {blob(500, 1100, 800, '#0F6B53', 90, 2)}
-      {blob(300, 600, 500, '#3DDC9740', 60, 4)}
+    <AbsoluteFill style={{ background: `linear-gradient(165deg, ${th.a} 0%, ${th.b} 70%)`, overflow: 'hidden' }}>
+      {blob(-200, 100, 700, th.blobs[0], 70, 0)}
+      {blob(500, 1100, 800, th.blobs[1], 90, 2)}
+      {blob(300, 600, 500, th.blobs[2], 60, 4)}
       <AbsoluteFill style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,.06) 2px, transparent 2px)', backgroundSize: '44px 44px' }} />
     </AbsoluteFill>
   );
@@ -114,7 +122,7 @@ const Calls = ({ s, l }) => {
           <div key={i} style={{ position: 'absolute', left: 110, right: 110, top: 840 + i * 150, height: 124, borderRadius: 30, background: 'rgba(255,255,255,.95)', display: 'flex', alignItems: 'center', gap: 26, padding: '0 32px', opacity: p, transform: `translateX(${(1 - p) * 300}px) scale(${0.9 + p * 0.1})`, boxShadow: '0 20px 40px rgba(0,0,0,.25)' }}>
             <div style={{ width: 66, height: 66, borderRadius: 18, background: '#FFE8E9', padding: 15 }}>{Ic.phone(C.red)}</div>
             <div style={{ flex: 1 }}><div style={{ fontSize: 36, fontWeight: 800, color: C.ink }}>{l.missed}</div><div style={{ fontSize: 28, color: '#6B7C76', fontWeight: 500 }}>{l.caller}</div></div>
-            <div style={{ fontSize: 30, color: '#6B7C76', fontWeight: 700 }}>{['10:02', '10:15', '10:31'][i]}</div>
+            <div style={{ fontSize: 26, color: '#6B7C76', fontWeight: 700, whiteSpace: 'nowrap' }}>{l.ago[i]}</div>
           </div>
         );
       })}
@@ -154,6 +162,7 @@ const Phone = ({ s, l }) => {
         <div style={{ position: 'absolute', inset: 0, borderRadius: 74, background: '#0B1512', boxShadow: '0 40px 90px rgba(0,0,0,.5), inset 0 0 0 3px #2A3A35' }} />
         <div style={{ position: 'absolute', inset: 16, borderRadius: 60, background: C.paper, overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: 18, left: '50%', width: 150, height: 40, marginLeft: -75, borderRadius: 20, background: '#0B1512', zIndex: 5 }} />
+          {s.bookedAt && <div style={{ position: 'absolute', top: 22, left: 40, fontSize: 24, fontWeight: 800, color: '#fff', zIndex: 6 }}>{s.bookedAt}</div>}
           <div style={{ background: C.g, color: '#fff', padding: '86px 34px 30px' }}>
             <div style={{ fontSize: 24, opacity: 0.75, fontWeight: 700 }}>RezEt</div>
             <div style={{ fontSize: fit(s.biz, 38, 20), fontWeight: 900, marginTop: 6 }}>{s.biz}</div>
@@ -326,6 +335,111 @@ const Review = ({ s, l }) => {
   );
 };
 
+/* ---------- söhbət: müştəri yazır, cavab gəlir (gec və ya dərhal) ---------- */
+const Chat = ({ s }) => {
+  const f = useCurrentFrame(), { durationInFrames } = useVideoConfig();
+  const [ask, reply, late] = s.items;
+  const t2 = Math.round(durationInFrames * 0.5);
+  const p1 = useSpring(14), p2 = useSpring(t2), pl = useSpring(t2 - 20);
+  const typing = f > 34 && f < t2 - 4;
+  const bubble = (text, mine, p) => (
+    <div style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: 760, background: mine ? C.mint : '#fff', color: C.ink, fontSize: fit(text, 42, 44), fontWeight: 700, lineHeight: 1.3, padding: '26px 32px', borderRadius: 34, borderBottomRightRadius: mine ? 8 : 34, borderBottomLeftRadius: mine ? 34 : 8, opacity: p, transform: `translateY(${(1 - p) * 40}px) scale(${0.92 + p * 0.08})`, boxShadow: '0 16px 40px rgba(0,0,0,.25)' }}>{text}</div>
+  );
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={190} size={80} />
+      <div style={{ position: 'absolute', top: 520, left: 80, right: 80, display: 'flex', flexDirection: 'column', gap: 28 }}>
+        {bubble(ask, false, p1)}
+        {late && <div style={{ alignSelf: 'center', color: 'rgba(255,255,255,.75)', fontSize: 30, fontWeight: 700, opacity: pl }}>{late}</div>}
+        {typing ? <div style={{ alignSelf: 'flex-end', background: 'rgba(255,255,255,.18)', borderRadius: 30, padding: '22px 30px', display: 'flex', gap: 10 }}>{[0, 1, 2].map(i => <span key={i} style={{ width: 16, height: 16, borderRadius: 8, background: '#fff', opacity: 0.35 + 0.65 * Math.abs(Math.sin(f / 6 + i)) }} />)}</div> : bubble(reply, true, p2)}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- POV: böyük, cəsarətli bir cümlə ---------- */
+const Pov = ({ s }) => {
+  const f = useCurrentFrame(), { fps } = useVideoConfig();
+  const words = s.title.split(' ');
+  const tag = spring({ frame: f - 4, fps, config: { damping: 12 } });
+  const zoom = interpolate(f, [0, 120], [1.05, 1], clamp);
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <div style={{ position: 'absolute', top: 520, left: 90, right: 90, transform: `scale(${zoom})`, transformOrigin: 'left center' }}>
+        <div style={{ display: 'inline-block', background: C.mint, color: C.deep, fontWeight: 900, fontSize: 42, padding: '10px 24px', borderRadius: 14, marginBottom: 34, transform: `scale(${tag})` }}>POV</div>
+        <div style={{ fontSize: fit(s.title, 94, 32), fontWeight: 900, lineHeight: 1.1, color: '#fff', letterSpacing: '-0.02em' }}>
+          {words.map((w, i) => { const p = spring({ frame: f - 12 - i * 4, fps, config: { damping: 14 } }); return <span key={i} style={{ display: 'inline-block', marginRight: '0.25em', opacity: p, transform: `translateY(${(1 - p) * 60}px)`, color: i >= words.length - 2 ? C.mint : undefined }}>{w}</span>; })}
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- telefon bildirişləri: kilid ekranında RezEt bildirişləri ---------- */
+const Notifs = ({ s, l }) => {
+  const f = useCurrentFrame();
+  const enter = interpolate(f, [12, 34], [0, 1], { ...clamp, easing: Easing.bezier(0.22, 1, 0.36, 1) });
+  const ps = [useSpring(40), useSpring(66), useSpring(92)];
+  const W = 600, H = 1000;
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={170} size={76} />
+      <div style={{ position: 'absolute', left: (1080 - W) / 2, top: 380, width: W, height: H, opacity: enter, transform: `translateY(${(1 - enter) * 140}px)` }}>
+        <div style={{ position: 'absolute', inset: 0, borderRadius: 74, background: '#0B1512', boxShadow: '0 40px 90px rgba(0,0,0,.5), inset 0 0 0 3px #2A3A35' }} />
+        <div style={{ position: 'absolute', inset: 16, borderRadius: 60, overflow: 'hidden', background: 'linear-gradient(180deg, #2A6B5A 0%, #0B2E25 100%)' }}>
+          <div style={{ position: 'absolute', top: 18, left: '50%', width: 150, height: 40, marginLeft: -75, borderRadius: 20, background: '#0B1512' }} />
+          <div style={{ textAlign: 'center', color: '#fff', marginTop: 110 }}>
+            <div style={{ fontSize: 30, fontWeight: 700, opacity: 0.85 }}>{s.weekday}</div>
+            <div style={{ fontSize: 120, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{s.bookedAt}</div>
+          </div>
+          <div style={{ position: 'absolute', top: 360, left: 22, right: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {s.items.slice(0, 3).map((x, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,.92)', borderRadius: 28, padding: '20px 22px', display: 'flex', gap: 16, alignItems: 'flex-start', opacity: ps[i], transform: `translateY(${(1 - ps[i]) * -40}px) scale(${0.94 + ps[i] * 0.06})`, boxShadow: '0 10px 24px rgba(0,0,0,.2)' }}>
+                <Img src={staticFile('logo.svg')} style={{ width: 58, height: 58, borderRadius: 14, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 22, fontWeight: 800, color: '#40524C' }}><span>RezEt</span><span>{l.ago[i]}</span></div>
+                  <div style={{ fontSize: fit(x, 28, 34), fontWeight: 700, color: C.ink, lineHeight: 1.25, marginTop: 4 }}>{x}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+/* ---------- təqvim: həftə rezervlərlə dolur ---------- */
+const Calendar = ({ s, l }) => {
+  const f = useCurrentFrame(), { durationInFrames } = useVideoConfig();
+  const enter = interpolate(f, [12, 34], [0, 1], { ...clamp, easing: Easing.bezier(0.22, 1, 0.36, 1) });
+  const order = Array.from({ length: 42 }, (_, i) => ({ i, k: (i * 37 + 11) % 42 })).sort((a, b) => a.k - b.k).slice(0, 32);
+  const rank = new Map(order.map((o, r) => [o.i, r]));
+  const span = durationInFrames * 0.55;
+  const colors = [C.mint, '#9BE8C6', C.g, '#F5B83D'];
+  return (
+    <AbsoluteFill style={{ fontFamily }}>
+      <Title text={s.title} top={190} size={80} />
+      <div style={{ position: 'absolute', top: 480, left: 70, right: 70, background: C.paper, borderRadius: 40, overflow: 'hidden', opacity: enter, transform: `translateY(${(1 - enter) * 120}px)`, boxShadow: '0 40px 90px rgba(0,0,0,.45)' }}>
+        <div style={{ background: C.g, color: '#fff', padding: '26px 36px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontSize: fit(s.biz, 36, 20), fontWeight: 900 }}>{s.biz}</div>
+          <div style={{ background: 'rgba(255,255,255,.16)', borderRadius: 999, padding: '8px 20px', fontSize: 24, fontWeight: 800 }}>{l.week}</div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 10, padding: '18px 22px 26px' }}>
+          {l.days.map(d => <div key={d} style={{ textAlign: 'center', fontSize: 24, fontWeight: 800, color: '#6B7C76' }}>{d}</div>)}
+          {Array.from({ length: 42 }, (_, i) => {
+            const r = rank.get(i);
+            const on = r !== undefined ? interpolate(f, [30 + (r * span) / 32, 38 + (r * span) / 32], [0, 1], clamp) : 0;
+            return <div key={i} style={{ height: 78, borderRadius: 14, background: '#E2EBE7', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', inset: 0, background: colors[i % colors.length], opacity: on, transform: `scale(${0.6 + on * 0.4})`, borderRadius: 14 }} />
+            </div>;
+          })}
+        </div>
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 /* ---------- 4: çağırış ---------- */
 const Cta = ({ s, url }) => {
   const f = useCurrentFrame();
@@ -345,14 +459,14 @@ const Cta = ({ s, url }) => {
 };
 
 export const L = {
-  az: { missed: 'Buraxılmış zəng', choose: 'Xidmət seçin', chooseTime: 'Vaxt seçin · Sabah', confirm: 'Təsdiqlə', tomorrow: 'Sabah', emailSent: 'Təsdiq e-poçta göndərildi', cur: 'AZN', before: 'Əvvəl', after: 'RezEt ilə', today: 'Bu gün', confirmed: 'Təsdiq', came: 'Gəldi', verified: 'Təsdiqlənmiş müştəri', caller: 'Yeni müştəri' },
-  en: { missed: 'Missed call', choose: 'Choose a service', chooseTime: 'Pick a time · Tomorrow', confirm: 'Confirm', tomorrow: 'Tomorrow', emailSent: 'Confirmation sent by email', cur: 'AZN', before: 'Before', after: 'With RezEt', today: 'Today', confirmed: 'Confirmed', came: 'Arrived', verified: 'Verified customer', caller: 'New client' }
+  az: { missed: 'Buraxılmış zəng', choose: 'Xidmət seçin', chooseTime: 'Vaxt seçin · Sabah', confirm: 'Təsdiqlə', tomorrow: 'Sabah', emailSent: 'Təsdiq e-poçta göndərildi', cur: 'AZN', before: 'Əvvəl', after: 'RezEt ilə', today: 'Bu gün', confirmed: 'Təsdiq', came: 'Gəldi', verified: 'Təsdiqlənmiş müştəri', caller: 'Yeni müştəri', ago: ['indi', '5 dəq əvvəl', '12 dəq əvvəl'], week: 'Bu həftə', days: ['B.e', 'Ç.a', 'Ç', 'C.a', 'C', 'Ş', 'B'] },
+  en: { missed: 'Missed call', choose: 'Choose a service', chooseTime: 'Pick a time · Tomorrow', confirm: 'Confirm', tomorrow: 'Tomorrow', emailSent: 'Confirmation sent by email', cur: 'AZN', before: 'Before', after: 'With RezEt', today: 'Today', confirmed: 'Confirmed', came: 'Arrived', verified: 'Verified customer', caller: 'New client', ago: ['now', '5 min ago', '12 min ago'], week: 'This week', days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] }
 };
-const SCENES = { calls: Calls, question: Question, phone: Phone, cards: Cards, beforeAfter: BeforeAfter, panel: Panel, tips: Tips, review: Review, cta: Cta };
+const SCENES = { calls: Calls, question: Question, phone: Phone, cards: Cards, beforeAfter: BeforeAfter, panel: Panel, tips: Tips, review: Review, chat: Chat, pov: Pov, notifications: Notifs, calendar: Calendar, cta: Cta };
 
-export const Promo = ({ scenes, url, music, lang }) => (
+export const Promo = ({ scenes, url, music, lang, theme }) => (
   <AbsoluteFill style={{ fontFamily, background: C.deep }}>
-    <Bg />
+    <Bg theme={theme} />
     {music && <Audio src={staticFile(music)} />}
     <TransitionSeries>
       {scenes.flatMap((s, i) => {
@@ -362,7 +476,7 @@ export const Promo = ({ scenes, url, music, lang }) => (
             <Sequence from={i ? T : 0} durationInFrames={sceneFrames(s) - (i ? T : 0)} layout="none">
               <S s={s} url={url} l={L[lang] || L.az} />
               <Subs words={s.words} />
-              {s.line && !s.words?.length && <Line text={s.line} delay={s.type === 'tips' || s.type === 'beforeAfter' ? 70 : 34} />}
+              {s.line && !s.words?.length && <Line text={s.line} delay={{ tips: 70, beforeAfter: 70, chat: 90, pov: 60 }[s.type] || 34} />}
             </Sequence>
             {s.audio && <Audio src={staticFile(s.audio)} />}
           </TransitionSeries.Sequence>

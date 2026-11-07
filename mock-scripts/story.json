@@ -4,12 +4,43 @@
   "biz": "Qəzalto Restoran",
   "pick": 1,
   "time": "16:00",
-  "icons": ["cal", "mail", "star"],
+  "icons": [
+    "cal",
+    "mail",
+    "star"
+  ],
   "az": {
     "scenes": [
-      { "type": "calls", "title": "Cümə axşamı, zal dolu, telefon susmur", "line": "Masa sifarişi üçün zənglər cavabsız qalır.", "items": ["5 buraxılmış zəng"], "services": [] },
-      { "type": "panel", "title": "İndi masalar onlayn sifariş olunur", "line": "Hər rezerv avtomatik paneldə görünür.", "items": ["Rəşad H. · 2 nəfərlik masa · 19:00", "Səbinə K. · 4 nəfərlik masa · 19:30", "Orxan T. · Ad günü · 20:00"], "services": [] },
-      { "type": "review", "title": "Qonaqlar da fərqi görür", "line": "Təsdiqlənmiş rəylər yeni qonaq gətirir.", "items": ["Aynur S.", "Masanı bir dəqiqəyə sifariş etdim, gələndə hər şey hazır idi."], "services": [] }
+      {
+        "type": "calls",
+        "title": "Cümə axşamı, zal dolu, telefon susmur",
+        "line": "Masa sifarişi üçün zənglər cavabsız qalır.",
+        "items": [
+          "5 buraxılmış zəng"
+        ],
+        "services": []
+      },
+      {
+        "type": "panel",
+        "title": "İndi masalar onlayn sifariş olunur",
+        "line": "Hər rezerv avtomatik paneldə görünür.",
+        "items": [
+          "Rəşad H. · 2 nəfərlik masa · 19:00",
+          "Səbinə K. · 4 nəfərlik masa · 19:30",
+          "Orxan T. · Ad günü · 20:00"
+        ],
+        "services": []
+      },
+      {
+        "type": "review",
+        "title": "Qonaqlar da fərqi görür",
+        "line": "Təsdiqlənmiş rəylər yeni qonaq gətirir.",
+        "items": [
+          "Aynur S.",
+          "Masanı bir dəqiqəyə sifariş etdim, gələndə hər şey hazır idi."
+        ],
+        "services": []
+      }
     ],
     "ctaSub": "Restoranlar üçün onlayn rezerv",
     "ctaButton": "Pulsuz başlayın",
@@ -18,13 +49,47 @@
   },
   "en": {
     "scenes": [
-      { "type": "calls", "title": "Friday night, full house, phone ringing", "line": "Table requests go unanswered.", "items": ["5 missed calls"], "services": [] },
-      { "type": "panel", "title": "Now tables are booked online", "line": "Every booking shows up in your panel.", "items": ["Rashad H. · Table for 2 · 19:00", "Sabina K. · Table for 4 · 19:30", "Orkhan T. · Birthday · 20:00"], "services": [] },
-      { "type": "review", "title": "Guests notice the difference", "line": "Verified reviews bring new guests.", "items": ["Aynur S.", "I booked a table in a minute and everything was ready when we arrived."], "services": [] }
+      {
+        "type": "calls",
+        "title": "Friday night, full house, phone ringing",
+        "line": "Table requests go unanswered.",
+        "items": [
+          "5 missed calls"
+        ],
+        "services": []
+      },
+      {
+        "type": "panel",
+        "title": "Now tables are booked online",
+        "line": "Every booking shows up in your panel.",
+        "items": [
+          "Rashad H. · Table for 2 · 19:00",
+          "Sabina K. · Table for 4 · 19:30",
+          "Orkhan T. · Birthday · 20:00"
+        ],
+        "services": []
+      },
+      {
+        "type": "review",
+        "title": "Guests notice the difference",
+        "line": "Verified reviews bring new guests.",
+        "items": [
+          "Aynur S.",
+          "I booked a table in a minute and everything was ready when we arrived."
+        ],
+        "services": []
+      }
     ],
     "ctaSub": "Online booking for restaurants",
     "ctaButton": "Start for free",
     "title": "Full house and missed calls? Take table bookings online | RezEt",
     "caption": "On the busiest night there's no time for the phone. With RezEt, guests book their table online. #Restaurants #SmallBusiness #OnlineBooking"
-  }
+  },
+  "sequence": [
+    "calls",
+    "panel",
+    "review"
+  ],
+  "angle": "test",
+  "bookedAt": "16:00"
 }

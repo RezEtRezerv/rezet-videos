@@ -4,12 +4,45 @@
   "biz": "Lumora Beauty Salon",
   "pick": 0,
   "time": "11:00",
-  "icons": ["cal", "mail", "star"],
+  "icons": [
+    "cal",
+    "mail",
+    "star"
+  ],
   "az": {
     "scenes": [
-      { "type": "question", "title": "Rezervləri hələ də dəftərdə yazırsınız?", "line": "Bir səhv səhifə — bir itirilmiş müştəri.", "items": [], "services": [] },
-      { "type": "beforeAfter", "title": "Bir gün, iki fərqli səhər", "line": "Eyni salon. Daha sakit gün.", "items": ["Dəftərdə qarışıq qeydlər", "Gecə gələn mesajlar", "Gəlməyən müştərilər", "Hamısı bir paneldə", "7/24 onlayn rezerv", "2 saat əvvəl xatırlatma"], "services": [] },
-      { "type": "panel", "title": "Günün planı bir baxışda", "line": "Kim, nə vaxt, hansı xidmət — hamısı burada.", "items": ["Leyla M. · Manikür · 10:00", "Nərmin Ə. · Saç boyama · 11:30", "Aytən Q. · Qaş dizaynı · 14:00"], "services": [] }
+      {
+        "type": "question",
+        "title": "Rezervləri hələ də dəftərdə yazırsınız?",
+        "line": "Bir səhv səhifə — bir itirilmiş müştəri.",
+        "items": [],
+        "services": []
+      },
+      {
+        "type": "beforeAfter",
+        "title": "Bir gün, iki fərqli səhər",
+        "line": "Eyni salon. Daha sakit gün.",
+        "items": [
+          "Dəftərdə qarışıq qeydlər",
+          "Gecə gələn mesajlar",
+          "Gəlməyən müştərilər",
+          "Hamısı bir paneldə",
+          "7/24 onlayn rezerv",
+          "2 saat əvvəl xatırlatma"
+        ],
+        "services": []
+      },
+      {
+        "type": "panel",
+        "title": "Günün planı bir baxışda",
+        "line": "Kim, nə vaxt, hansı xidmət — hamısı burada.",
+        "items": [
+          "Leyla M. · Manikür · 10:00",
+          "Nərmin Ə. · Saç boyama · 11:30",
+          "Aytən Q. · Qaş dizaynı · 14:00"
+        ],
+        "services": []
+      }
     ],
     "ctaSub": "Bizneslər üçün onlayn rezerv",
     "ctaButton": "Pulsuz başlayın",
@@ -18,13 +51,49 @@
   },
   "en": {
     "scenes": [
-      { "type": "question", "title": "Still writing bookings in a notebook?", "line": "One wrong page means one lost client.", "items": [], "services": [] },
-      { "type": "beforeAfter", "title": "Same salon, two mornings", "line": "Same team. A calmer day.", "items": ["Messy notebook entries", "Late-night messages", "Clients who never show", "Everything in one panel", "24/7 online booking", "Reminder 2 hours before"], "services": [] },
-      { "type": "panel", "title": "Your day at a glance", "line": "Who, when and which service — all here.", "items": ["Leyla M. · Manicure · 10:00", "Narmin A. · Hair colour · 11:30", "Aytan G. · Brow design · 14:00"], "services": [] }
+      {
+        "type": "question",
+        "title": "Still writing bookings in a notebook?",
+        "line": "One wrong page means one lost client.",
+        "items": [],
+        "services": []
+      },
+      {
+        "type": "beforeAfter",
+        "title": "Same salon, two mornings",
+        "line": "Same team. A calmer day.",
+        "items": [
+          "Messy notebook entries",
+          "Late-night messages",
+          "Clients who never show",
+          "Everything in one panel",
+          "24/7 online booking",
+          "Reminder 2 hours before"
+        ],
+        "services": []
+      },
+      {
+        "type": "panel",
+        "title": "Your day at a glance",
+        "line": "Who, when and which service — all here.",
+        "items": [
+          "Leyla M. · Manicure · 10:00",
+          "Narmin A. · Hair colour · 11:30",
+          "Aytan G. · Brow design · 14:00"
+        ],
+        "services": []
+      }
     ],
     "ctaSub": "Online booking for businesses",
     "ctaButton": "Start for free",
     "title": "From notebook to online booking: a calmer day for your salon | RezEt",
     "caption": "Notebooks, late messages and forgotten appointments slow a salon down. RezEt keeps every booking in one panel. #Beauty #SmallBusiness #OnlineBooking"
-  }
+  },
+  "sequence": [
+    "question",
+    "beforeAfter",
+    "panel"
+  ],
+  "angle": "test",
+  "bookedAt": "11:00"
 }

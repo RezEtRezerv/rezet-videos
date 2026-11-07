@@ -1,0 +1,93 @@
+{
+  "topic": "Late-night bookings at a nail studio",
+  "angle": "test",
+  "sector": "beauty",
+  "biz": "Mirelya Nail Studio",
+  "pick": 1,
+  "time": "11:00",
+  "bookedAt": "23:10",
+  "icons": [
+    "cal",
+    "mail",
+    "star"
+  ],
+  "sequence": [
+    "chat",
+    "notifications",
+    "calendar"
+  ],
+  "az": {
+    "scenes": [
+      {
+        "type": "chat",
+        "title": "Gecə 23:10, müştəri yazır",
+        "line": "Səhər cavab verəndə artıq gec olur.",
+        "items": [
+          "Salam, sabah saat 11:00-a yer var?",
+          "Bağışlayın, artıq doludur",
+          "8 saat sonra"
+        ],
+        "services": []
+      },
+      {
+        "type": "notifications",
+        "title": "RezEt ilə isə belə olur",
+        "line": "Siz yatarkən rezerv qəbul olunur.",
+        "items": [
+          "Yeni rezerv: Aysel K. · 11:00",
+          "Təsdiq e-poçtu göndərildi",
+          "Xatırlatma 2 saat əvvəl gedəcək"
+        ],
+        "services": []
+      },
+      {
+        "type": "calendar",
+        "title": "Həftə öz-özünə dolur",
+        "line": "Siz işləyin, rezervləri RezEt tutsun.",
+        "items": [],
+        "services": []
+      }
+    ],
+    "ctaSub": "Bizneslər üçün onlayn rezerv",
+    "ctaButton": "Pulsuz başlayın",
+    "title": "Gecə yazan müştərini itirməyin | RezEt",
+    "caption": "Müştəriləriniz gecə də rezerv etmək istəyir. RezEt 7/24 sizin yerinizə cavab verir. #RezEt #bakı #azərbaycan #manikür #salon #biznes"
+  },
+  "en": {
+    "scenes": [
+      {
+        "type": "chat",
+        "title": "23:10, a client messages",
+        "line": "By morning it is too late.",
+        "items": [
+          "Hi, any slot tomorrow at 11:00?",
+          "Sorry, we are fully booked now",
+          "8 hours later"
+        ],
+        "services": []
+      },
+      {
+        "type": "notifications",
+        "title": "With RezEt it looks like this",
+        "line": "Bookings come in while you sleep.",
+        "items": [
+          "New booking: Aysel K. · 11:00",
+          "Confirmation email sent",
+          "Reminder goes out 2 hours before"
+        ],
+        "services": []
+      },
+      {
+        "type": "calendar",
+        "title": "Your week fills itself",
+        "line": "You work, RezEt takes the bookings.",
+        "items": [],
+        "services": []
+      }
+    ],
+    "ctaSub": "Online booking for businesses",
+    "ctaButton": "Start for free",
+    "title": "Never lose a late-night client again | RezEt",
+    "caption": "Clients want to book at night too. RezEt answers 24/7 for you. #SmallBusiness #OnlineBooking #Azerbaijan"
+  }
+}
