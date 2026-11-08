@@ -20,5 +20,14 @@
     "topic": "Tour operators: travellers book weekend autumn trips online at night instead of waiting for a reply to their messages",
     "biz": "Səyranix Tours",
     "hook": "Gecə yazdı, cavab gec gəldi"
+  },
+  {
+    "date": "2026-11-08",
+    "format": "pov+phone+notifications",
+    "theme": "midnight",
+    "sector": "barber",
+    "topic": "Barbershops: clients book Monday slots online on Sunday night while the shop is closed and the owner rests",
+    "biz": "Zentaro Barber House",
+    "hook": "Bazar günü bərbərxana bağlıdır, telefon isə susmur"
   }
 ]
