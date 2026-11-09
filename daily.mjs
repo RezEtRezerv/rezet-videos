@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
-import { makeMusic } from './music.mjs';
+import { makeMusic, GENRES, pickBpm } from './music.mjs';
 
 const FPS = 30, T = 18, MAX_TRIES = 3; // 3-cü cəhd yalnız yoxlama keçməyəndə işləyir
 const MOCK = (process.argv.find(a => a.startsWith('--mock')) || '').split('=')[1] || (process.argv.includes('--mock') ? 'problem' : '');
@@ -26,12 +26,38 @@ const isWin = process.platform === 'win32';
 const npx = (args, opts = {}) => execFileSync(isWin ? 'npx.cmd' : 'npx', args, { stdio: 'inherit', shell: isWin, ...opts });
 
 // Səhnə növləri: Claude hər gün 3-nü özü seçib birləşdirir (ilk səhnə "hook", ən azı biri məhsulu göstərir)
-const TYPES = ['calls', 'question', 'pov', 'chat', 'phone', 'panel', 'notifications', 'calendar', 'cards', 'beforeAfter', 'tips', 'review'];
-const HOOKS = ['calls', 'question', 'pov', 'chat'];
-const PRODUCT = ['phone', 'panel', 'notifications', 'calendar'];
-const BARS = { calls: 3, question: 2, pov: 2, chat: 4, phone: 4, panel: 3, notifications: 3, calendar: 3, cards: 3, beforeAfter: 4, tips: 4, review: 3, cta: 3 };
+const TYPES = ['calls', 'question', 'pov', 'chat', 'phone', 'panel', 'notifications', 'calendar', 'cards', 'beforeAfter', 'tips', 'review', 'quiz', 'headline', 'countdown', 'flood', 'split', 'list', 'caption'];
+const HOOKS = ['calls', 'question', 'pov', 'chat', 'quiz', 'headline', 'flood', 'caption', 'countdown'];
+const PRODUCT = ['phone', 'panel', 'notifications', 'calendar', 'split'];
+// Hər səhnənin təxmini uzunluğu (saniyə). Musiqinin tempinə görə tam xanalara yuvarlaqlaşdırılır
+const SEC = { calls: 7.2, question: 4.8, pov: 4.8, chat: 9.6, phone: 9.6, panel: 7.2, notifications: 7.2, calendar: 7.2, cards: 7.2, beforeAfter: 9.6, tips: 9.6, review: 7.2, quiz: 9.6, headline: 6.6, countdown: 9.6, flood: 8.4, split: 8.4, list: 9.6, caption: 5, cta: 7.2 };
 const dayNo = Math.floor(Date.parse(today) / 864e5);
-const THEME = ['forest', 'midnight', 'sunset', 'plum'][dayNo % 4]; // hər gün fərqli fon rəngi
+// Günün üslubu: Claude seçir, son günlərdə istifadə olunanlar qadağandır (src/Promo.jsx ilə eyni adlar)
+const STYLE = {
+  palette: ['forest', 'midnight', 'sunset', 'plum', 'electric', 'tangerine', 'hotpink', 'noir', 'ocean', 'cherry', 'royal'],
+  font: ['inter', 'montserrat', 'unbounded', 'rubik', 'bricolage', 'sora', 'oswald', 'archivo'],
+  look: ['glow', 'grid', 'bold', 'grain', 'stripes', 'footage'],
+  anim: ['rise', 'pop', 'slam', 'type', 'mask', 'highlight'],
+  trans: ['slide', 'wipe', 'flip', 'clock', 'iris', 'push', 'fade'],
+  cta: ['center', 'stack', 'stamp'],
+  music: Object.keys(GENRES)
+};
+// Neçə gün ərzində təkrar olmamalıdır
+const NO_REPEAT = { palette: 6, font: 4, look: 2, anim: 3, trans: 3, cta: 1, music: 5 };
+const FOOTAGE = !!process.env.PIXABAY_API_KEY;
+const pastTypes = n => history.slice(-n).flatMap(h => h.types || String(h.format || '').split('+'));
+const pastStyle = (k, n) => history.slice(-n).map(h => h.style?.[k]).filter(Boolean);
+// Təkrarlanan üslub seçimi avtomatik dəyişdirilir (əlavə API xərci yoxdur)
+function fixStyle(st = {}) {
+  const out = {};
+  for (const [k, opts] of Object.entries(STYLE)) {
+    const banned = new Set(pastStyle(k, NO_REPEAT[k]));
+    if (k === 'look' && !FOOTAGE) banned.add('footage');
+    const free = opts.filter(o => !banned.has(o));
+    out[k] = free.includes(st[k]) ? st[k] : free[(dayNo + k.length) % free.length] || opts[0];
+  }
+  return out;
+}
 const WEEKDAYS = {
   az: ['Bazar', 'Bazar ertəsi', 'Çərşənbə axşamı', 'Çərşənbə', 'Cümə axşamı', 'Cümə', 'Şənbə'],
   en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -64,6 +90,11 @@ const Script = z.object({
   time: z.enum(SLOTS).describe('The appointment time the customer books (shown in the phone)'),
   bookedAt: z.string().describe('HH:MM clock time WHEN the customer makes the booking (shown on the phone status bar and lock screen), e.g. "23:10" for a late-night booking'),
   icons: z.array(z.enum(ICONS)).describe('Exactly 3 icons matching the 3 benefit items of a cards scene, in order'),
+  style: z.object({
+    palette: z.enum(STYLE.palette), font: z.enum(STYLE.font), look: z.enum(STYLE.look), anim: z.enum(STYLE.anim),
+    trans: z.enum(STYLE.trans), cta: z.enum(STYLE.cta), music: z.enum(STYLE.music)
+  }).describe('The visual and musical identity of today\'s video. Must fit the mood of the idea and differ from recent days'),
+  footage: z.array(z.string()).describe('Exactly 3 English stock-video search queries (2-4 words), one per scene, used only when look = footage'),
   az: Lang,
   en: Lang
 });
@@ -72,7 +103,7 @@ const SYSTEM = `You write daily short vertical promo videos (Instagram Reels, Yo
 What RezEt does: customers book online 24/7 without calling; they get email confirmation and an email reminder 2 hours before; the business manages bookings, staff schedules, closed days and customers in one panel; verified customer reviews with stars; waitlist emails when a slot frees up; a free plan exists.
 
 Each video = 3 scenes you choose and write (the "sequence") + a fixed RezEt logo ending.
-Sequence rules: scene 1 must be a hook type (calls, question, pov, chat); at least one scene must show the product (phone, panel, notifications, calendar); no scene type twice; do not reuse a recent sequence.
+Sequence rules: scene 1 must be a hook type (${HOOKS.join(', ')}); at least one scene must show the product (${PRODUCT.join(', ')}); no scene type twice; never use a scene type from the last 2 videos (the banned list is given each day).
 Scene types and how to fill them (unused fields: empty string or empty array):
 - calls: three missed-call cards. title = short problem hook (max 42 chars); line = max 55 chars; items = [badge "3 missed calls" (the number is always 3)].
 - question: title = a sharp question to the viewer (max 48); line = max 55; items = [].
@@ -86,12 +117,30 @@ Scene types and how to fill them (unused fields: empty string or empty array):
 - panel: the owner's panel with today's bookings. title max 40; line max 50; items = exactly 3 bookings formatted "First name + surname initial · Service · HH:MM" (e.g. "Leyla M. · Manicure · 10:30"), times ascending.
 - tips: title like "3 ways to …" (max 40); line max 50; items = exactly 3 practical, useful tips for business owners (max 44 each); at least one tip is solved by RezEt.
 - review: a 5-star review card (always 5 stars). title max 40; line max 50; items = [reviewer "First name + surname initial" (max 16), a short realistic customer review of the business (max 90)].
+- quiz: a two-option quiz with a timer; option A (the old way) gets crossed out, option B (the RezEt way) wins. title = the quiz question (max 48); line max 50; items = [option A (max 40), option B (max 40)].
+- headline: a playful "breaking news" card with a scrolling ticker. title = a funny, obviously light-hearted headline about everyday business life (max 60, never fake real-world news, never about real people, places' politics or tragedies); line max 50; items = [short label like "SON DƏQİQƏ" / "BREAKING" (max 16), ticker text (max 60)].
+- countdown: huge 3, 2, 1 with one idea per number. title max 40; line max 50; items = exactly 3 short ideas for 3, 2 and 1 (max 34 each), building to a payoff on 1.
+- flood: the screen fills with real-sounding customer messages, then they all fly away. title max 40; line max 50 (the relief / solution); items = exactly 6 short customer messages (max 34 each) like "Sabaha yer var?" or "Saat neçədə açıqsınız?".
+- split: split screen, chaos on top, calm with RezEt below. title max 40; line max 50; items = [top label (max 16, e.g. "Without RezEt"), bottom label (max 16, e.g. "With RezEt"), top text (max 46), bottom text (max 46)].
+- list: big outlined numbers 01-03 with common mistakes that get crossed out. title like "3 mistakes salons make" (max 40); line max 50 (how RezEt fixes them); items = exactly 3 mistakes (max 34 each).
+- caption: a bold word-by-word social caption hook, best over real footage. title = the hook sentence (max 52); line max 50; items = [].
+
+Style (field "style"; choose to fit the mood of the idea, never the same combination as recent days):
+- palette: forest (deep green), midnight (navy + sky blue), sunset (warm red + gold), plum (purple + pink), electric (vivid blue + yellow), tangerine (bright orange), hotpink (magenta + yellow), noir (black + neon lime), ocean (teal + gold), cherry (red + cream), royal (violet + mint).
+- font: inter (clean), montserrat (geometric), unbounded (wide, futuristic), rubik (friendly, rounded), bricolage (editorial, quirky), sora (modern tech), oswald (tall, condensed, uppercase, loud), archivo (strong grotesque).
+- look (background): glow (soft light blobs), grid (retro neon perspective grid), bold (flat colour with big moving shapes), grain (film grain + light sweep), stripes (animated diagonal stripes), footage (real stock video clips behind the text).
+- anim (how titles appear): rise, pop (bouncy), slam (big punch-in with shake), type (typewriter), mask (words slide out of a mask), highlight (last words get a marker highlight).
+- trans (scene changes): slide, wipe, flip, clock, iris, push, fade.
+- cta (ending layout): center, stack (big left-aligned), stamp (logo badge).
+- music: lofi (chill jazzy), trap (hard 808s and hi-hats), house (four-on-the-floor, groovy), afro (afrobeats, log drums), synthwave (80s neon), acoustic (guitar, bright), mugham (Azerbaijani tar + daf fusion), funk (slap bass, clavinet). All genres are played as calm, soft background music. Match the mood: warm stories suit acoustic/afro/lofi, local or holiday ideas suit mugham, night/tech ideas suit synthwave, upbeat ideas suit house/funk/trap.
+- footage: when look = footage, give 3 English search queries for royalty-free stock clips, one per scene, showing atmosphere WITHOUT recognizable faces, logos or brand names (e.g. "barber scissors closeup", "salon chair interior", "phone in hands", "restaurant table night", "clinic hallway"). The people in clips are not customers of the business: never say or imply they are.
 
 Goal: videos that Azerbaijani business owners and their customers stop scrolling for, watch to the end and share.
 Creative rules:
 - The first 2 seconds decide everything. Use a specific, relatable, slightly surprising hook from real life in Azerbaijan (a barber with clippers in hand while the phone rings, a clinic receptionist with a queue, a restaurant on a Friday night, a salon before a wedding, a tour guide on a bus). Use light humour, a twist, a bold POV or a sharp question. No clichés like "Welcome" or "Do you want to grow?".
 - Use the date: if a holiday, season or typical busy period is near (Novruz, weddings season, New Year, school start, summer trips, Friday evenings), you may build the idea around it. Never political, religious or controversial topics.
-- Every video must feel completely new: new situation, new sector, new sequence, new wording, new joke. Never repeat a recent hook, topic, sequence or business name.
+- Every video must feel completely new: new situation, new sector, new sequence, new wording, new joke, new look and new music. Never repeat a recent hook, topic, sequence or business name.
+- Think like a top short-form creator: open a curiosity gap or a strong emotion in the first second, keep a surprise for the middle, land a satisfying payoff. Prefer formats people share or comment on: relatable pain, quizzes, playful "breaking news", countdowns, a flood of messages, a before/after split.
 - No emoji in on-screen texts (they may not render). Emoji are fine in the caption.
 - Keep each on-screen text short and punchy. One idea per scene. The story must flow: problem, solution with RezEt, payoff.
 - The caption starts with a strong first line, then 1-2 short sentences, then 6-10 relevant hashtags mixing Azerbaijani and local tags (e.g. #bakı #azərbaycan #biznes plus sector tags).
@@ -108,8 +157,11 @@ Language rules:
 
 async function writeScript(client, feedback) {
   if (MOCK) return JSON.parse(fs.readFileSync(`mock-scripts/${MOCK}.json`, 'utf8'));
-  const recent = history.slice(-30).map(h => `${h.date}: ${h.format || '-'} | ${h.sector} | ${h.topic} | ${h.biz}${h.hook ? ' | hook: ' + h.hook : ''}`).join('\n') || 'none yet';
+  const recent = history.slice(-30).map(h => `${h.date}: ${h.format || '-'} | ${h.sector} | ${h.topic} | ${h.biz}${h.hook ? ' | hook: ' + h.hook : ''}${h.style ? ' | style: ' + Object.values(h.style).join('/') : ''}`).join('\n') || 'none yet';
   const fix = feedback ? `\n\nA previous attempt today FAILED the automatic checks. Fix these problems:\n- ${feedback.join('\n- ')}` : '';
+  const banned = [`scene types: ${[...new Set(pastTypes(2))].join(', ') || 'none'}`,
+    ...Object.keys(STYLE).map(k => `${k}: ${[...new Set(pastStyle(k, NO_REPEAT[k]))].join(', ') || 'none'}`),
+    ...(FOOTAGE ? [] : ['look: footage (not available today)'])].join('\n- ');
   const res = await client.beta.messages.parse({
     model: MODEL_WRITE,
     max_tokens: 20000,
@@ -117,7 +169,7 @@ async function writeScript(client, feedback) {
     fallbacks: 'default',
     output_config: { effort: 'high', format: betaZodOutputFormat(Script) },
     system: SYSTEM,
-    messages: [{ role: 'user', content: `Date: ${today} (${WEEKDAYS.en[weekdayNo]}).\nRecent videos (do not repeat their hooks, topics, sequences or names):\n${recent}${fix}\n\nWrite today's video.` }]
+    messages: [{ role: 'user', content: `Date: ${today} (${WEEKDAYS.en[weekdayNo]}).\nRecent videos (do not repeat their hooks, topics, sequences or names):\n${recent}\n\nBanned today (used too recently):\n- ${banned}${fix}\n\nWrite today's video.` }]
   });
   if (res.stop_reason === 'refusal') throw new Error('Claude bu gün ssenari yazmaqdan imtina etdi');
   if (!res.parsed_output) throw new Error('Claude cavabı JSON kimi oxunmadı');
@@ -149,7 +201,8 @@ function scrub(v, where = '') {
   return v;
 }
 const NO_LINKS = /(https?:\/\/|www\.|[\w.+-]+@[\w-]+\.\w|\+\d{6,})/i;
-const LIMITS = { calls: [42, 55, 1, 22], question: [48, 55, 0, 0], pov: [52, 55, 0, 0], chat: [40, 50, 3, 60], phone: [40, 50, 1, 24], panel: [40, 50, 3, 40], notifications: [40, 50, 3, 34], calendar: [40, 50, 0, 0], cards: [26, 50, 3, 28], beforeAfter: [40, 50, 6, 28], tips: [40, 50, 3, 44], review: [40, 50, 2, 90] };
+// [başlıq, alt sətir, element sayı, element uzunluğu]
+const LIMITS = { calls: [42, 55, 1, 22], question: [48, 55, 0, 0], pov: [52, 55, 0, 0], chat: [40, 50, 3, 60], phone: [40, 50, 1, 24], panel: [40, 50, 3, 40], notifications: [40, 50, 3, 34], calendar: [40, 50, 0, 0], cards: [26, 50, 3, 28], beforeAfter: [40, 50, 6, 28], tips: [40, 50, 3, 44], review: [40, 50, 2, 90], quiz: [48, 50, 2, 40], headline: [60, 50, 2, 60], countdown: [40, 50, 3, 34], flood: [40, 50, 6, 34], split: [40, 50, 4, 46], list: [40, 50, 3, 34], caption: [52, 50, 0, 0] };
 const TIME_RE = /\b([01]?\d|2[0-3])[:.]([0-5]\d)\b/g;
 const hhmm = t => { const m = String(t).match(/^([01]?\d|2[0-3])[:.]([0-5]\d)$/); return m ? `${m[1].padStart(2, '0')}:${m[2]}` : null; };
 function check(sc) {
@@ -166,8 +219,11 @@ function check(sc) {
   if (seq.length !== 3 || new Set(seq).size !== 3) bad.push('sequence must be exactly 3 different scene types');
   if (!HOOKS.includes(seq[0])) bad.push(`scene 1 must be one of: ${HOOKS.join(', ')}`);
   if (!seq.some(t => PRODUCT.includes(t))) bad.push(`at least one scene must be one of: ${PRODUCT.join(', ')}`);
-  if (!MOCK && history.slice(-5).some(h => h.format === seq.join('+'))) bad.push(`sequence ${seq.join('+')} was used in the last 5 days, choose another`);
+  const usedTypes = new Set(pastTypes(2));
+  if (!MOCK) for (const t of seq) if (usedTypes.has(t)) bad.push(`scene type ${t} was used in the last 2 videos, choose another`);
   sc.sequence = seq;
+  sc.style = fixStyle(sc.style);
+  sc.footage = (sc.footage || []).map(q => String(q).replace(/[^\w\s-]/g, ' ').trim()).filter(Boolean).slice(0, 3);
   FORMAT = seq.join('+');
   for (const k of ['az', 'en']) {
     const v = sc[k];
@@ -199,21 +255,51 @@ function check(sc) {
   return bad;
 }
 
-/* ---------- 3. Video ---------- */
-function build(sc, lang, bpm, musicFile) {
-  const v = sc[lang], barF = (60 / bpm) * 4 * FPS;
+/* ---------- 3. Real video klipləri (Pixabay, pulsuz lisenziya) ---------- */
+// Hər səhnəyə ayrı klip. Üz və loqo olmayan "atmosfer" kadrları axtarılır. Alınmasa, video klipsiz hazırlanır.
+async function getClips(queries) {
+  const key = process.env.PIXABAY_API_KEY;
+  if (!key || !queries.length) return [];
+  const used = new Set(history.flatMap(h => h.clips || []));
+  const dir = path.join('public', 'footage');
+  fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
+  const clips = [];
+  for (const [i, q] of queries.entries()) {
+    try {
+      const res = await fetch(`https://pixabay.com/api/videos/?key=${encodeURIComponent(key)}&q=${encodeURIComponent(q)}&safesearch=true&per_page=30&order=popular`);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const hits = ((await res.json()).hits || []).filter(h => h.duration >= 5 && !used.has(h.id) && !clips.some(c => c.id === h.id));
+      const hit = hits[Math.floor(((dayNo * 7 + i * 3) % 10) / 10 * Math.min(hits.length, 10))];
+      if (!hit) { console.log(`Klip tapılmadı: "${q}"`); continue; }
+      const v = [hit.videos.large, hit.videos.medium, hit.videos.small].find(x => x?.url && x.width >= 960 && x.width <= 1920) || hit.videos.medium || hit.videos.small;
+      const file = path.join(dir, `${today}-${i}.mp4`);
+      fs.writeFileSync(file, Buffer.from(await (await fetch(v.url)).arrayBuffer()));
+      clips.push({ id: hit.id, src: `footage/${today}-${i}.mp4`, frames: Math.floor(hit.duration * FPS) - 2 });
+      console.log(`Klip ${i + 1}: "${q}" -> pixabay #${hit.id} (${v.width}x${v.height}, ${hit.duration}s)`);
+    } catch (e) { console.log(`Klip alınmadı ("${q}"): ${e.message}`); }
+  }
+  return clips;
+}
+
+/* ---------- 4. Video ---------- */
+// Hər səhnə musiqinin tam xanaları qədər davam edir (keçidlər ritmə düşür)
+const planBars = (sc, bpm) => [...sc.sequence, 'cta'].map(t => Math.max(1, Math.round(SEC[t] / (240 / bpm))));
+function build(sc, lang, bpm, musicFile, clips = []) {
+  const v = sc[lang], barF = (60 / bpm) * 4 * FPS, bars = planBars(sc, bpm);
   const scenes = [
-    ...v.scenes.map(s => ({
-      type: s.type, bars: BARS[s.type], title: s.title, line: s.line, items: s.items,
+    ...v.scenes.map((s, i) => ({
+      type: s.type, bars: bars[i], title: s.title, line: s.line, items: s.items,
+      ...(clips.length ? { clip: clips[i % clips.length].src, clipFrames: clips[i % clips.length].frames } : {}),
       // Videoda 3 zəng kartı var, ona görə nişandakı rəqəm həmişə 3 olur
       ...(s.type === 'calls' ? { badge: String(s.items[0]).replace(/\d+/, '3') } : {}),
       ...(s.type === 'phone' ? { services: s.services, pick: sc.pick, time: sc.time, ok: s.items[0] } : {}),
       ...(s.type === 'cards' ? { icons: sc.icons } : {}),
       biz: sc.biz, bookedAt: sc.bookedAt, weekday: WEEKDAYS[lang][weekdayNo]
     })),
-    { type: 'cta', bars: BARS.cta, title: 'RezEt', sub: v.ctaSub, button: v.ctaButton }
+    { type: 'cta', bars: bars[bars.length - 1], title: 'RezEt', sub: v.ctaSub, button: v.ctaButton }
   ].map(s => ({ ...s, frames: Math.round(s.bars * barF) + T }));
-  const props = { id: `${today}-${lang}`, lang, scenes, music: musicFile, theme: THEME };
+  const style = { ...sc.style, look: sc.style.look === 'footage' && !clips.length ? 'glow' : sc.style.look };
+  const props = { id: `${today}-${lang}`, lang, scenes, music: musicFile, style };
   const pf = `props-${lang}.json`;
   fs.writeFileSync(pf, JSON.stringify(props, null, 2));
   const out = path.join(SITE, `${today}-${lang}.mp4`);
@@ -227,7 +313,7 @@ function frames(lang, video, scenes) {
   let start = 0;
   scenes.forEach((s, i) => {
     const from = start + (i ? T : 0), len = s.frames - (i ? T : 0);
-    const points = s.type === 'phone' ? [0.2, 0.5, 0.88] : s.type === 'chat' ? [0.4, 0.92] : [0.9];
+    const points = { phone: [0.2, 0.5, 0.88], chat: [0.4, 0.92], quiz: [0.4, 0.85], countdown: [0.27, 0.58, 0.9], flood: [0.55, 0.92] }[s.type] || [0.9];
     for (const p of points) shots.push({ label: `${lang} scene ${i + 1} (${s.type})`, t: (from + len * p) / FPS });
     start += s.frames - T;
   });
@@ -250,8 +336,11 @@ Fail the video if you see ANY of these:
 How the scenes work (do NOT fail for these):
 - A scene is an animation and you get 1-3 frames of it. Judge a scene by all of its frames together: something shown in one frame of a scene counts as shown.
 - The phone scene animates in 3 steps: service list with prices, then the time picker, then the confirmation. Prices only appear in the first step.
-- pov, question and tips scenes are big text on a background by design; they have no picture.
+- pov, question, tips, caption, countdown and list scenes are big text on a background by design; they have no picture.
+- quiz: option A is crossed out and option B wins on purpose. countdown shows 3, 2, 1 one after another, each with its own line. flood: the messages fly away at the end on purpose. list: the mistakes get crossed out on purpose. headline is a playful "breaking news" style card, not real news.
+- Backgrounds, colours, fonts and animations change every day on purpose. Real stock video clips may appear behind the text.
 - A title or bottom line on two lines is fine if it reads well.
+Also fail if a background video clip shows a clearly recognizable face in close-up, a readable logo or brand name, or anything inappropriate.
 Ignore small style preferences. Only report real problems a viewer would notice. Each problem: one short sentence naming the frame and what to change.`;
 const QaResult = z.object({ pass: z.boolean(), problems: z.array(z.string()) });
 
@@ -274,10 +363,28 @@ async function review(client, sc, shots) {
   return res.parsed_output;
 }
 
-/* ---------- 5. Əsas axın ---------- */
+/* ---------- 6. Əsas axın ---------- */
 const client = MOCK ? null : new Anthropic();
 fs.mkdirSync(path.join('public', 'music'), { recursive: true });
-const bpm = 96 + (dayNo % 11); // hər gün bir az fərqli temp
+let clips = [], clipKey = '';
+
+// Musiqi (seçilən janr, səhnə keçidlərində zərb) + iki video
+async function produce(sc, withFrames = true) {
+  const bpm = pickBpm(sc.style.music, today), bars = planBars(sc, bpm);
+  const marks = bars.slice(0, -1).map((_, i) => bars.slice(0, i + 1).reduce((a, b) => a + b, 0));
+  if (sc.style.look === 'footage') {
+    const k = (sc.footage || []).join('|');
+    if (k !== clipKey) { clips = await getClips(sc.footage || []); clipKey = k; }
+  } else clips = [];
+  const m = makeMusic({ seed: today, genre: sc.style.music, bpm, bars: bars.reduce((a, b) => a + b, 0), marks, file: path.join('public', 'music', `${today}.wav`) });
+  console.log(`Üslub: ${Object.entries(sc.style).map(([k, v]) => `${k}=${v}`).join(', ')} | ${m.bpm} bpm${clips.length ? ` | ${clips.length} klip` : ''}`);
+  const shots = [];
+  for (const lang of ['az', 'en']) {
+    const { out, scenes } = build(sc, lang, bpm, `music/${today}.wav`, sc.style.look === 'footage' ? clips : []);
+    if (withFrames) shots.push(...frames(lang, out, scenes));
+  }
+  return shots;
+}
 
 let sc, feedback = null, log = [];
 for (let attempt = 1; ; attempt++) {
@@ -294,13 +401,7 @@ for (let attempt = 1; ; attempt++) {
     log.push({ attempt, stage: 'text', problems: bad });
     feedback = bad;
   } else {
-    // Musiqi seçilən səhnələrin uzunluğuna görə yaradılır
-    makeMusic({ seed: today, bpm, bars: sc.sequence.reduce((n, t) => n + BARS[t], BARS.cta), file: path.join('public', 'music', `${today}.wav`) });
-    const shots = [];
-    for (const lang of ['az', 'en']) {
-      const { out, scenes } = build(sc, lang, bpm, `music/${today}.wav`);
-      shots.push(...frames(lang, out, scenes));
-    }
+    const shots = await produce(sc);
     const r = await review(client, sc, shots);
     log.push({ attempt, stage: 'visual', ...r });
     if (r.pass) { console.log('Vizual yoxlama keçdi ✅'); break; }
@@ -319,9 +420,9 @@ for (let attempt = 1; ; attempt++) {
     console.log(`${MAX_TRIES} cəhd keçmədi, ehtiyat video paylaşılır: ${pickName}`);
     sc = scrub(JSON.parse(fs.readFileSync(path.join('mock-scripts', pickName), 'utf8')));
     FORMAT = sc.sequence.join('+');
+    sc.style = fixStyle({ ...(sc.style || {}), look: (sc.style || {}).look === 'footage' ? 'glow' : sc.style?.look });
     fs.rmSync(SITE, { recursive: true, force: true }); fs.mkdirSync(SITE, { recursive: true });
-    makeMusic({ seed: today, bpm, bars: sc.sequence.reduce((n, t) => n + BARS[t], BARS.cta), file: path.join('public', 'music', `${today}.wav`) });
-    for (const lang of ['az', 'en']) build(sc, lang, bpm, `music/${today}.wav`);
+    await produce({ ...sc, style: { ...sc.style, look: sc.style.look === 'footage' ? 'glow' : sc.style.look } }, false);
     sc.fallback = true;
     log.push({ attempt: 'fallback', stage: 'fallback', file: pickName });
     break;
@@ -340,6 +441,7 @@ fs.writeFileSync(path.join(SITE, 'index.html'), `<!doctype html><html lang="az">
 <style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;background:#F4F8F6;color:#10231D}h1{font-size:1.3rem;color:#0D5E4A}section{background:#fff;border-radius:16px;padding:16px;margin:0 0 16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}video{width:100%;max-width:360px;border-radius:12px;display:block}.t{font-weight:700;margin:12px 0 4px}.c{white-space:pre-wrap;margin:0 0 12px}button,a{display:inline-block;background:#0D5E4A;color:#fff;border:0;border-radius:10px;padding:12px 16px;font-size:1rem;text-decoration:none;margin:4px 6px 0 0}a{background:#3DDC97;color:#062A21}</style>
 <h1>RezEt · ${today}</h1>${block('az', 'Azərbaycanca (TikTok, Instagram, YouTube)')}${block('en', 'English (LinkedIn)')}
 <script>document.addEventListener('click',async e=>{const b=e.target.closest('[data-copy]');if(!b)return;const t=document.getElementById(b.dataset.copy).textContent;try{await navigator.clipboard.writeText(t);b.textContent='Kopyalandı ✓'}catch{b.textContent='Mətni əl ilə seçin'}});</script></html>`);
-history.push({ date: today, format: FORMAT, theme: THEME, sector: sc.sector, topic: sc.topic, biz: sc.biz, hook: sc.az.scenes[0]?.title, ...(sc.fallback ? { fallback: true } : {}) });
+const usedStyle = { ...sc.style, look: sc.style.look === 'footage' && !clips.length ? 'glow' : sc.style.look };
+history.push({ date: today, format: FORMAT, types: sc.sequence, style: usedStyle, sector: sc.sector, topic: sc.topic, biz: sc.biz, hook: sc.az.scenes[0]?.title, ...(clips.length && usedStyle.look === 'footage' ? { clips: clips.map(c => c.id) } : {}), ...(sc.fallback ? { fallback: true } : {}) });
 fs.writeFileSync(HISTORY, JSON.stringify(history.slice(-90), null, 2));
 console.log('Hazırdır:', `${BASE}/latest.json`);

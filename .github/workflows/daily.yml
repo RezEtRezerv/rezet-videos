@@ -49,6 +49,7 @@ jobs:
         run: node daily.mjs
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           PAGES_URL: ${{ steps.pages.outputs.base_url }}
 
       # Sınaq üçün: videolar və yoxlama kadrları Actions səhifəsində yüklənə bilər

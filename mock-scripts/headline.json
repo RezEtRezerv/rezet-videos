@@ -1,0 +1,35 @@
+{
+  "topic": "Barbers: playful breaking news, a flood of client messages, then booking on the phone",
+  "angle": "Fake-news parody hook, relatable message flood, satisfying 30-second booking payoff",
+  "sequence": ["headline", "flood", "phone"],
+  "sector": "barber",
+  "biz": "Qarvento Barber",
+  "pick": 2,
+  "time": "16:00",
+  "bookedAt": "09:40",
+  "icons": ["cal", "mail", "star"],
+  "style": { "palette": "noir", "font": "unbounded", "look": "grid", "anim": "type", "trans": "clock", "cta": "stamp", "music": "synthwave" },
+  "footage": [],
+  "az": {
+    "scenes": [
+      { "type": "headline", "title": "Bərbər qayçını yerə qoymadan bütün günü doldurdu", "line": "Sirr sadədir: müştərilər özü yazılır.", "items": ["SON DƏQİQƏ", "Bərbərlər telefona cavab verməkdən yorulub"], "services": [] },
+      { "type": "flood", "title": "Bazar səhəri bərbərin telefonu", "line": "RezEt ilə sual yox, hazır rezerv gəlir.", "items": ["Sabaha yer var?", "Saat neçədə açıqsınız?", "Saqqal da düzəldirsiniz?", "Qiymət nə qədərdir?", "Bu gün 5-də olar?", "Cavab verə bilərsiniz?"], "services": [] },
+      { "type": "phone", "title": "Müştəri 30 saniyəyə yazılır", "line": "Təsdiq e-poçtla dərhal gəlir.", "items": ["Rezerv təsdiqləndi"], "services": [{ "name": "Saç kəsimi", "price": 15 }, { "name": "Saqqal", "price": 10 }, { "name": "Saç + saqqal", "price": 22 }] }
+    ],
+    "ctaSub": "Bərbərlər üçün onlayn rezerv",
+    "ctaButton": "Pulsuz başlayın",
+    "title": "Son dəqiqə: bərbər telefona cavab vermədən günü doldurdu | RezEt",
+    "caption": "Telefon susmursa, problem müştərilərdə deyil 😄 RezEt ilə müştərilər özü yazılır, siz isə işinizlə məşğul olursunuz. #rezet #bərbər #bakı #azərbaycan #biznes #onlaynrezerv"
+  },
+  "en": {
+    "scenes": [
+      { "type": "headline", "title": "Barber fills the whole day without putting down his scissors", "line": "The secret: clients book themselves.", "items": ["BREAKING", "Barbers are tired of answering the phone"], "services": [] },
+      { "type": "flood", "title": "A barber's phone on Sunday morning", "line": "With RezEt you get bookings, not questions.", "items": ["Any slot tomorrow?", "What time do you open?", "Do you do beards too?", "How much is it?", "Can I come at 5 today?", "Can you answer please?"], "services": [] },
+      { "type": "phone", "title": "The client books in 30 seconds", "line": "The confirmation arrives by email.", "items": ["Booking confirmed"], "services": [{ "name": "Haircut", "price": 15 }, { "name": "Beard", "price": 10 }, { "name": "Hair + beard", "price": 22 }] }
+    ],
+    "ctaSub": "Online booking for barbers",
+    "ctaButton": "Start for free",
+    "title": "Breaking: barber fills his day without answering the phone | RezEt",
+    "caption": "If your phone never stops, your booking system is the problem. With RezEt, clients book themselves while you work. #SmallBusiness #Barber #OnlineBooking #Azerbaijan"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "topic": "Restaurants: why finding a table on Friday is hard, booking in 3 steps, the week filling up",
+  "angle": "Relatable caption hook, countdown gives a clear simple process, calendar shows the owner's payoff",
+  "sequence": ["caption", "countdown", "calendar"],
+  "sector": "restaurant",
+  "biz": "Lumora Restoran",
+  "pick": 1,
+  "time": "15:30",
+  "bookedAt": "15:30",
+  "icons": ["cal", "mail", "star"],
+  "style": { "palette": "tangerine", "font": "bricolage", "look": "grain", "anim": "highlight", "trans": "iris", "cta": "center", "music": "mugham" },
+  "footage": [],
+  "az": {
+    "scenes": [
+      { "type": "caption", "title": "Cümə axşamı masa tapmaq niyə bu qədər çətindir?", "line": "Çünki hamı eyni anda zəng edir.", "items": [], "services": [] },
+      { "type": "countdown", "title": "Masanı 3 addımda tutun", "line": "Zəng yox, gözləmə yox.", "items": ["Restoranı açın", "Uyğun saatı seçin", "Təsdiq e-poçtla gəlir"], "services": [] },
+      { "type": "calendar", "title": "Restoranın həftəsi özü dolur", "line": "Hər rezerv avtomatik qrafikə düşür.", "items": [], "services": [] }
+    ],
+    "ctaSub": "Restoranlar üçün onlayn rezerv",
+    "ctaButton": "Pulsuz başlayın",
+    "title": "Cümə axşamı masa tapmaq niyə bu qədər çətindir? | RezEt",
+    "caption": "Hamı eyni anda zəng edəndə xətt məşğul olur. RezEt ilə qonaqlar masanı 3 addımda özləri tutur. #rezet #restoran #bakı #azərbaycan #biznes #onlaynrezerv"
+  },
+  "en": {
+    "scenes": [
+      { "type": "caption", "title": "Why is finding a table on Friday so hard?", "line": "Because everyone calls at the same time.", "items": [], "services": [] },
+      { "type": "countdown", "title": "Book a table in 3 steps", "line": "No calls, no waiting.", "items": ["Open the restaurant", "Pick a time that suits you", "Confirmation arrives by email"], "services": [] },
+      { "type": "calendar", "title": "The restaurant's week fills itself", "line": "Every booking lands in the schedule.", "items": [], "services": [] }
+    ],
+    "ctaSub": "Online booking for restaurants",
+    "ctaButton": "Start for free",
+    "title": "Why is finding a table on Friday so hard? | RezEt",
+    "caption": "When everyone calls at once, the line is always busy. With RezEt, guests book their table in 3 steps. #SmallBusiness #Restaurant #OnlineBooking #Azerbaijan"
+  }
+}

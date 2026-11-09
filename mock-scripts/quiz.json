@@ -1,0 +1,35 @@
+{
+  "topic": "Beauty salons: a quiz about late-night booking requests, then a split screen and the 3 classic mistakes",
+  "angle": "Quiz hook makes viewers answer in their head, split screen shows the contrast, list gives practical value",
+  "sequence": ["quiz", "split", "list"],
+  "sector": "beauty",
+  "biz": "Selvora Beauty",
+  "pick": 1,
+  "time": "11:00",
+  "bookedAt": "11:00",
+  "icons": ["cal", "mail", "star"],
+  "style": { "palette": "electric", "font": "oswald", "look": "bold", "anim": "slam", "trans": "push", "cta": "stack", "music": "trap" },
+  "footage": [],
+  "az": {
+    "scenes": [
+      { "type": "quiz", "title": "Müştəri gecə yer istəyir. Nə edirsiniz?", "line": "Doğru cavab: yatarkən də rezerv qəbul edin.", "items": ["Səhər zəng edib soruşuram", "Özü onlayn yer tutur"], "services": [] },
+      { "type": "split", "title": "Eyni şənbə, iki fərqli salon", "line": "RezEt ilə qrafik özü dolur.", "items": ["RezEt-siz", "RezEt ilə", "Zəng, mesaj, dəftər, qarışıqlıq", "Hər rezerv avtomatik paneldə"], "services": [] },
+      { "type": "list", "title": "Salonların 3 böyük səhvi", "line": "RezEt üçünü də avtomatik həll edir.", "items": ["Zəngləri buraxmaq", "Xatırlatma göndərməmək", "Qeydləri dəftərdə saxlamaq"], "services": [] }
+    ],
+    "ctaSub": "Salonlar üçün onlayn rezerv",
+    "ctaButton": "Pulsuz başlayın",
+    "title": "Müştəri gecə yer istəyir. Siz nə edirsiniz? | RezEt",
+    "caption": "Doğru cavabı tapdınız? 😉 RezEt ilə müştərilər gecə də özləri yer tutur, siz isə səhər hazır qrafik görürsünüz. #rezet #gözəlliksalonu #bakı #azərbaycan #biznes #onlaynrezerv"
+  },
+  "en": {
+    "scenes": [
+      { "type": "quiz", "title": "A client wants a slot at midnight. You…", "line": "Right answer: take bookings while you sleep.", "items": ["Call them back in the morning", "They book online themselves"], "services": [] },
+      { "type": "split", "title": "Same Saturday, two salons", "line": "With RezEt the schedule fills itself.", "items": ["Without RezEt", "With RezEt", "Calls, messages, notebook, chaos", "Every booking lands in the panel"], "services": [] },
+      { "type": "list", "title": "3 big mistakes salons make", "line": "RezEt fixes all three automatically.", "items": ["Missing calls", "Sending no reminders", "Keeping notes on paper"], "services": [] }
+    ],
+    "ctaSub": "Online booking for salons",
+    "ctaButton": "Start for free",
+    "title": "A client wants a slot at midnight. What do you do? | RezEt",
+    "caption": "Did you get it right? With RezEt, clients book even at night and you wake up to a ready schedule. #SmallBusiness #BeautySalon #OnlineBooking #Azerbaijan"
+  }
+}
