@@ -29,5 +29,14 @@
     "topic": "Barbershops: clients book Monday slots online on Sunday night while the shop is closed and the owner rests",
     "biz": "Zentaro Barber House",
     "hook": "Bazar günü bərbərxana bağlıdır, telefon isə susmur"
+  },
+  {
+    "date": "2026-11-09",
+    "format": "calls+phone+panel",
+    "theme": "sunset",
+    "sector": "restaurant",
+    "topic": "Restaurants: guests reserve tables online on a busy Friday night while waiters are serving and calls go unanswered",
+    "biz": "Narventa Restaurant",
+    "hook": "Cümə gecəsi: zal dolu, telefon susmur"
   }
 ]
