@@ -38,5 +38,27 @@
     "topic": "Restaurants: guests reserve tables online on a busy Friday night while waiters are serving and calls go unanswered",
     "biz": "Narventa Restaurant",
     "hook": "Cümə gecəsi: zal dolu, telefon susmur"
+  },
+  {
+    "date": "2026-11-10",
+    "format": "headline+split+cards",
+    "types": [
+      "headline",
+      "split",
+      "cards"
+    ],
+    "style": {
+      "palette": "ocean",
+      "font": "bricolage",
+      "look": "bold",
+      "anim": "highlight",
+      "trans": "push",
+      "cta": "stamp",
+      "music": "funk"
+    },
+    "sector": "clinic",
+    "topic": "Clinics: email reminders 2 hours before and waitlist emails stop empty slots from no-shows",
+    "biz": "Kelvora Derma Clinic",
+    "hook": "Pasiyent qəbulu unutmadı, həkim şokdadır"
   }
 ]
