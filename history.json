@@ -60,5 +60,27 @@
     "topic": "Clinics: email reminders 2 hours before and waitlist emails stop empty slots from no-shows",
     "biz": "Kelvora Derma Clinic",
     "hook": "Pasiyent qəbulu unutmadı, həkim şokdadır"
+  },
+  {
+    "date": "2026-11-11",
+    "format": "flood+calendar+review",
+    "types": [
+      "flood",
+      "calendar",
+      "review"
+    ],
+    "style": {
+      "palette": "plum",
+      "font": "montserrat",
+      "look": "glow",
+      "anim": "pop",
+      "trans": "iris",
+      "cta": "center",
+      "music": "house"
+    },
+    "sector": "beauty",
+    "topic": "Beauty salons in wedding season: brides and guests book hair and makeup online 24/7 instead of flooding the salon with messages",
+    "biz": "Zermira Bridal Studio",
+    "hook": "Toy mövsümü: salonun telefonu partlayır"
   }
 ]
