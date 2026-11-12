@@ -82,5 +82,27 @@
     "topic": "Beauty salons in wedding season: brides and guests book hair and makeup online 24/7 instead of flooding the salon with messages",
     "biz": "Zermira Bridal Studio",
     "hook": "Toy mövsümü: salonun telefonu partlayır"
+  },
+  {
+    "date": "2026-11-12",
+    "format": "quiz+list+phone",
+    "types": [
+      "quiz",
+      "list",
+      "phone"
+    ],
+    "style": {
+      "palette": "midnight",
+      "font": "sora",
+      "look": "grain",
+      "anim": "mask",
+      "trans": "wipe",
+      "cta": "stack",
+      "music": "synthwave"
+    },
+    "sector": "tour",
+    "topic": "Tour operators: travellers book winter mountain trips online late at night while the guide is on the road and messages pile up",
+    "biz": "Dornavi Tours",
+    "hook": "Qış turuna yer necə tutulmalıdır?"
   }
 ]
