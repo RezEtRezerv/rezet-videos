@@ -104,5 +104,27 @@
     "topic": "Tour operators: travellers book winter mountain trips online late at night while the guide is on the road and messages pile up",
     "biz": "Dornavi Tours",
     "hook": "Qış turuna yer necə tutulmalıdır?"
+  },
+  {
+    "date": "2026-11-13",
+    "format": "countdown+panel+cards",
+    "types": [
+      "countdown",
+      "panel",
+      "cards"
+    ],
+    "style": {
+      "palette": "noir",
+      "font": "oswald",
+      "look": "stripes",
+      "anim": "slam",
+      "trans": "clock",
+      "cta": "stamp",
+      "music": "trap"
+    },
+    "sector": "barber",
+    "topic": "Barbershops on Friday: clients book their pre-weekend cut online while the barber's hands are busy with clippers",
+    "biz": "Branvol Barber Club",
+    "hook": "Cümə günü bərbər üçün 3, 2, 1"
   }
 ]
