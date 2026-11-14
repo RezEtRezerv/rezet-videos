@@ -126,5 +126,28 @@
     "topic": "Barbershops on Friday: clients book their pre-weekend cut online while the barber's hands are busy with clippers",
     "biz": "Branvol Barber Club",
     "hook": "Cümə günü bərbər üçün 3, 2, 1"
+  },
+  {
+    "date": "2026-11-14",
+    "format": "question+beforeAfter+panel",
+    "types": [
+      "question",
+      "beforeAfter",
+      "panel"
+    ],
+    "style": {
+      "palette": "electric",
+      "font": "archivo",
+      "look": "glow",
+      "anim": "rise",
+      "trans": "slide",
+      "cta": "center",
+      "music": "lofi"
+    },
+    "sector": "beauty",
+    "topic": "Beauty salon before and after online booking",
+    "biz": "Lumora Beauty Salon",
+    "hook": "Rezervləri hələ də dəftərdə yazırsınız?",
+    "fallback": true
   }
 ]
