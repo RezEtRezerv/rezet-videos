@@ -149,5 +149,32 @@
     "biz": "Lumora Beauty Salon",
     "hook": "Rezervləri hələ də dəftərdə yazırsınız?",
     "fallback": true
+  },
+  {
+    "date": "2026-11-15",
+    "format": "caption+phone+review",
+    "types": [
+      "caption",
+      "phone",
+      "review"
+    ],
+    "style": {
+      "palette": "sunset",
+      "font": "rubik",
+      "look": "footage",
+      "anim": "highlight",
+      "trans": "fade",
+      "cta": "stack",
+      "music": "acoustic"
+    },
+    "sector": "restaurant",
+    "topic": "Restaurants on Sunday: families book their lunch table online in a minute instead of debating in the group chat who will call",
+    "biz": "Dolvana Restaurant",
+    "hook": "Ailə qrupunda 47 mesaj: restorana kim zəng edəcək?",
+    "clips": [
+      27230,
+      83870,
+      270557
+    ]
   }
 ]
