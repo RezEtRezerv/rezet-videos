@@ -176,5 +176,28 @@
       83870,
       270557
     ]
+  },
+  {
+    "date": "2026-11-16",
+    "format": "chat+notifications+calendar",
+    "types": [
+      "chat",
+      "notifications",
+      "calendar"
+    ],
+    "style": {
+      "palette": "forest",
+      "font": "montserrat",
+      "look": "bold",
+      "anim": "mask",
+      "trans": "iris",
+      "cta": "center",
+      "music": "afro"
+    },
+    "sector": "beauty",
+    "topic": "Late-night bookings at a nail studio",
+    "biz": "Mirelya Nail Studio",
+    "hook": "Gecə 23:10, müştəri yazır",
+    "fallback": true
   }
 ]
