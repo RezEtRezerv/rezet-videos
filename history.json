@@ -199,5 +199,27 @@
     "biz": "Mirelya Nail Studio",
     "hook": "Gecə 23:10, müştəri yazır",
     "fallback": true
+  },
+  {
+    "date": "2026-11-17",
+    "format": "pov+split+tips",
+    "types": [
+      "pov",
+      "split",
+      "tips"
+    ],
+    "style": {
+      "palette": "royal",
+      "font": "inter",
+      "look": "grain",
+      "anim": "type",
+      "trans": "flip",
+      "cta": "stack",
+      "music": "house"
+    },
+    "sector": "clinic",
+    "topic": "Pediatric clinics in flu season: parents book a doctor's visit online at dawn instead of fighting a busy phone line",
+    "biz": "Nubelia Uşaq Klinikası",
+    "hook": "uşaq qızdırır, klinikanın xətti isə məşğuldur"
   }
 ]
