@@ -221,5 +221,32 @@
     "topic": "Pediatric clinics in flu season: parents book a doctor's visit online at dawn instead of fighting a busy phone line",
     "biz": "Nubelia Uşaq Klinikası",
     "hook": "uşaq qızdırır, klinikanın xətti isə məşğuldur"
+  },
+  {
+    "date": "2026-11-18",
+    "format": "headline+phone+review",
+    "types": [
+      "headline",
+      "phone",
+      "review"
+    ],
+    "style": {
+      "palette": "cherry",
+      "font": "unbounded",
+      "look": "footage",
+      "anim": "pop",
+      "trans": "wipe",
+      "cta": "stamp",
+      "music": "funk"
+    },
+    "sector": "barber",
+    "topic": "Barbershops: when a client cancels, RezEt's waitlist email fills the empty chair and reminders 2 hours before help clients remember their visit",
+    "biz": "Kortavo Barber Lounge",
+    "hook": "Müştəri gəlmədi, usta boş kreslo ilə söhbət etdi",
+    "clips": [
+      6387,
+      88686,
+      39767
+    ]
   }
 ]
