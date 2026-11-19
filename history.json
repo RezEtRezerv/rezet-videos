@@ -248,5 +248,27 @@
       88686,
       39767
     ]
+  },
+  {
+    "date": "2026-11-19",
+    "format": "calls+calendar+list",
+    "types": [
+      "calls",
+      "calendar",
+      "list"
+    ],
+    "style": {
+      "palette": "tangerine",
+      "font": "bricolage",
+      "look": "bold",
+      "anim": "highlight",
+      "trans": "push",
+      "cta": "stack",
+      "music": "mugham"
+    },
+    "sector": "restaurant",
+    "topic": "Restaurants in late November: companies start booking New Year corporate dinners, and RezEt lets them reserve tables online 24/7 instead of calling a busy line",
+    "biz": "Qalvero Restaurant",
+    "hook": "Noyabrdır, korporativ zənglər başladı"
   }
 ]
