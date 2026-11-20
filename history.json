@@ -270,5 +270,27 @@
     "topic": "Restaurants in late November: companies start booking New Year corporate dinners, and RezEt lets them reserve tables online 24/7 instead of calling a busy line",
     "biz": "Qalvero Restaurant",
     "hook": "Noyabrdır, korporativ zənglər başladı"
+  },
+  {
+    "date": "2026-11-20",
+    "format": "flood+notifications+cards",
+    "types": [
+      "flood",
+      "notifications",
+      "cards"
+    ],
+    "style": {
+      "palette": "ocean",
+      "font": "rubik",
+      "look": "grain",
+      "anim": "slam",
+      "trans": "iris",
+      "cta": "stamp",
+      "music": "lofi"
+    },
+    "sector": "tour",
+    "topic": "Tour operators on Friday: travellers book weekend trip seats online while the guide is busy on the bus with a microphone",
+    "biz": "Talvira Tours",
+    "hook": "Cümə günü, bələdçi mikrofondadır"
   }
 ]
