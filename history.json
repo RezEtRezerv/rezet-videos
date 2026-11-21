@@ -292,5 +292,32 @@
     "topic": "Tour operators on Friday: travellers book weekend trip seats online while the guide is busy on the bus with a microphone",
     "biz": "Talvira Tours",
     "hook": "Cümə günü, bələdçi mikrofondadır"
+  },
+  {
+    "date": "2026-11-21",
+    "format": "quiz+phone+tips",
+    "types": [
+      "quiz",
+      "phone",
+      "tips"
+    ],
+    "style": {
+      "palette": "hotpink",
+      "font": "sora",
+      "look": "footage",
+      "anim": "rise",
+      "trans": "flip",
+      "cta": "center",
+      "music": "acoustic"
+    },
+    "sector": "beauty",
+    "topic": "Hair salons on Saturday morning: clients book a blow-dry online while the stylist's hair dryer drowns out the ringing phone",
+    "biz": "Selvanu Hair Studio",
+    "hook": "Fen işləyir, telefon zəng çalır. Nə edirsiniz?",
+    "clips": [
+      150875,
+      12127,
+      29916
+    ]
   }
 ]
