@@ -319,5 +319,27 @@
       12127,
       29916
     ]
+  },
+  {
+    "date": "2026-11-22",
+    "format": "countdown+split+panel",
+    "types": [
+      "countdown",
+      "split",
+      "panel"
+    ],
+    "style": {
+      "palette": "sunset",
+      "font": "montserrat",
+      "look": "bold",
+      "anim": "type",
+      "trans": "clock",
+      "cta": "stamp",
+      "music": "afro"
+    },
+    "sector": "clinic",
+    "topic": "Physiotherapy clinics: on Sunday evening patients decide to finally treat their back pain and book Monday visits online while the clinic is closed",
+    "biz": "Vornessa Fizio Mərkəzi",
+    "hook": "Bazar axşamı, saat 21:40"
   }
 ]
