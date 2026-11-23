@@ -341,5 +341,27 @@
     "topic": "Physiotherapy clinics: on Sunday evening patients decide to finally treat their back pain and book Monday visits online while the clinic is closed",
     "biz": "Vornessa Fizio Mərkəzi",
     "hook": "Bazar axşamı, saat 21:40"
+  },
+  {
+    "date": "2026-11-23",
+    "format": "question+calendar+beforeAfter",
+    "types": [
+      "question",
+      "calendar",
+      "beforeAfter"
+    ],
+    "style": {
+      "palette": "electric",
+      "font": "unbounded",
+      "look": "grid",
+      "anim": "highlight",
+      "trans": "push",
+      "cta": "stack",
+      "music": "house"
+    },
+    "sector": "barber",
+    "topic": "Barbershops on Monday morning: the week is already booked because clients reserved online over the weekend while the barber rested",
+    "biz": "Drevano Barber Studio",
+    "hook": "Bazar ertəsi səhər: həftəniz artıq doludur?"
   }
 ]
