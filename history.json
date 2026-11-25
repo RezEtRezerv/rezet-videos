@@ -363,5 +363,28 @@
     "topic": "Barbershops on Monday morning: the week is already booked because clients reserved online over the weekend while the barber rested",
     "biz": "Drevano Barber Studio",
     "hook": "Bazar ertəsi səhər: həftəniz artıq doludur?"
+  },
+  {
+    "date": "2026-11-25",
+    "format": "caption+countdown+calendar",
+    "types": [
+      "caption",
+      "countdown",
+      "calendar"
+    ],
+    "style": {
+      "palette": "royal",
+      "font": "bricolage",
+      "look": "grain",
+      "anim": "mask",
+      "trans": "iris",
+      "cta": "center",
+      "music": "trap"
+    },
+    "sector": "restaurant",
+    "topic": "Restaurants: why finding a table on Friday is hard, booking in 3 steps, the week filling up",
+    "biz": "Lumora Restoran",
+    "hook": "Cümə axşamı masa tapmaq niyə bu qədər çətindir?",
+    "fallback": true
   }
 ]
