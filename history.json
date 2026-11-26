@@ -386,5 +386,28 @@
     "biz": "Lumora Restoran",
     "hook": "Cümə axşamı masa tapmaq niyə bu qədər çətindir?",
     "fallback": true
+  },
+  {
+    "date": "2026-11-26",
+    "format": "headline+flood+phone",
+    "types": [
+      "headline",
+      "flood",
+      "phone"
+    ],
+    "style": {
+      "palette": "noir",
+      "font": "archivo",
+      "look": "glow",
+      "anim": "rise",
+      "trans": "slide",
+      "cta": "stamp",
+      "music": "synthwave"
+    },
+    "sector": "barber",
+    "topic": "Barbers: playful breaking news, a flood of client messages, then booking on the phone",
+    "biz": "Qarvento Barber",
+    "hook": "Bərbər qayçını yerə qoymadan bütün günü doldurdu",
+    "fallback": true
   }
 ]
