@@ -409,5 +409,28 @@
     "biz": "Qarvento Barber",
     "hook": "Bərbər qayçını yerə qoymadan bütün günü doldurdu",
     "fallback": true
+  },
+  {
+    "date": "2026-11-27",
+    "format": "pov+phone+review",
+    "types": [
+      "pov",
+      "phone",
+      "review"
+    ],
+    "style": {
+      "palette": "midnight",
+      "font": "inter",
+      "look": "grid",
+      "anim": "slam",
+      "trans": "flip",
+      "cta": "stack",
+      "music": "funk"
+    },
+    "sector": "barber",
+    "topic": "Late-night bookings at a nail studio",
+    "biz": "Tornavi Barber House",
+    "hook": "əlində maşınka, telefon isə susmur",
+    "fallback": true
   }
 ]
