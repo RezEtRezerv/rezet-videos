@@ -432,5 +432,28 @@
     "biz": "Tornavi Barber House",
     "hook": "əlində maşınka, telefon isə susmur",
     "fallback": true
+  },
+  {
+    "date": "2026-11-28",
+    "format": "calls+phone+cards",
+    "types": [
+      "calls",
+      "phone",
+      "cards"
+    ],
+    "style": {
+      "palette": "tangerine",
+      "font": "rubik",
+      "look": "grain",
+      "anim": "highlight",
+      "trans": "push",
+      "cta": "center",
+      "music": "lofi"
+    },
+    "sector": "barber",
+    "topic": "Missed calls cost bookings",
+    "biz": "Nərvix Barber Studio",
+    "hook": "Hər buraxılmış zəng — itirilmiş müştəri",
+    "fallback": true
   }
 ]
